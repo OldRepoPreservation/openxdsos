@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>openxds</artifactId>
+    <groupId>org.openhealthtools.openxds</groupId>
+    <version>2.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>openxds-api</artifactId>
+  <packaging>jar</packaging>
+  <name>OpenXDS - API</name>
+  
+  <dependencies>
+  	<dependency>
+  		<groupId>org.openhealthtools.openxds</groupId>
+  		<artifactId>apache-axis2</artifactId>
+  		<version>${project.version}</version>
+  		<type>pom</type>
+  		<exclusions>
+  			<exclusion>
+  				<artifactId>servlet-api</artifactId>
+  				<groupId>javax.servlet</groupId>
+  			</exclusion>
+  		</exclusions>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.openhealthtools.openxds</groupId>
+  		<artifactId>common-utils</artifactId>
+  		<version>${release.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.openhie.openempi</groupId>
+  		<artifactId>openpixpdq</artifactId>
+  		<version>${openpixpdq.version}</version>
+  	</dependency>    
+  </dependencies>
+
+</project>
