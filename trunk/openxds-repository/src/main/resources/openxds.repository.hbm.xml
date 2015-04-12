@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="org.openhealthtools.openxds.repository.Repository" table="repository">
+        <id name="documentUniqueId" column="documentuniqueid" type="string"/>
+        <property name="mimeType" column="mimetype" type="string"/>
+        <property name="size" column="documentsize" type="int"/>
+        <property name="hash" column="hash" type="string"/>
+        <property name="binaryContent" column="content" type="binary"/>
+    </class>
+</hibernate-mapping>
+	
