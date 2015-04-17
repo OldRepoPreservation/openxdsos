@@ -115,9 +115,8 @@
                 <include name="repository.datasource.cfg.xml" />
                 <include name="repository.hbm.xml" />
             </fileset>
-            <fileset dir="${openxds.dir}/openxds-registry-patient-lightweight/target/classes">
+            <fileset dir="${openxds.dir}/openxds-registry-patient-openempi/target/classes">
             	<include name="org/**" />
-                <include name="personidentifier.hbm.xml" />
             </fileset>	
         	<!-- Disabled OpenEMPI adapter for patient registry -->
             <!--fileset dir="${openxds.dir}/openxds-registry-patient/target/classes">

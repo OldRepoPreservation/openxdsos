@@ -73,7 +73,6 @@
       <attribute value="jar:file:/home/odysseas/.m2/repository/com/tinkerpop/blueprints/blueprints-core/2.6.0/blueprints-core-2.6.0-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
-  <classpathentry kind="var" path="M2_REPO/com/misys/braid/braid-base/1.2.2/braid-base-1.2.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/codehaus/castor/castor/1.2/castor-1.2.jar" sourcepath="M2_REPO/org/codehaus/castor/castor/1.2/castor-1.2-sources.jar">
     <attributes>
       <attribute value="jar:file:/home/odysseas/.m2/repository/org/codehaus/castor/castor/1.2/castor-1.2-javadoc.jar!/" name="javadoc_location"/>
