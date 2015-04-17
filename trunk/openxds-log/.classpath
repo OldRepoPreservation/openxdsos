@@ -34,14 +34,24 @@
   </classpathentry>
   <classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar" sourcepath="M2_REPO/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-library/1.1/hamcrest-library-1.1.jar" sourcepath="M2_REPO/org/hamcrest/hamcrest-library/1.1/hamcrest-library-1.1-sources.jar"/>
-  <classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate/3.2.1.ga/hibernate-3.2.1.ga.jar" sourcepath="M2_REPO/org/hibernate/hibernate/3.2.1.ga/hibernate-3.2.1.ga-sources.jar">
+  <classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate/3.2.4.sp1/hibernate-3.2.4.sp1.jar" sourcepath="M2_REPO/org/hibernate/hibernate/3.2.4.sp1/hibernate-3.2.4.sp1-sources.jar">
     <attributes>
-      <attribute value="jar:file:/home/odysseas/.m2/repository/org/hibernate/hibernate/3.2.1.ga/hibernate-3.2.1.ga-javadoc.jar!/" name="javadoc_location"/>
+      <attribute value="jar:file:/home/odysseas/.m2/repository/org/hibernate/hibernate/3.2.4.sp1/hibernate-3.2.4.sp1-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
   <classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-annotations/3.3.0.ga/hibernate-annotations-3.3.0.ga.jar" sourcepath="M2_REPO/org/hibernate/hibernate-annotations/3.3.0.ga/hibernate-annotations-3.3.0.ga-sources.jar">
     <attributes>
       <attribute value="jar:file:/home/odysseas/.m2/repository/org/hibernate/hibernate-annotations/3.3.0.ga/hibernate-annotations-3.3.0.ga-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-commons-annotations/3.3.0.ga/hibernate-commons-annotations-3.3.0.ga.jar" sourcepath="M2_REPO/org/hibernate/hibernate-commons-annotations/3.3.0.ga/hibernate-commons-annotations-3.3.0.ga-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/odysseas/.m2/repository/org/hibernate/hibernate-commons-annotations/3.3.0.ga/hibernate-commons-annotations-3.3.0.ga-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/javassist/javassist/3.12.1.GA/javassist-3.12.1.GA.jar" sourcepath="M2_REPO/javassist/javassist/3.12.1.GA/javassist-3.12.1.GA-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/home/odysseas/.m2/repository/javassist/javassist/3.12.1.GA/javassist-3.12.1.GA-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
   <classpathentry kind="var" path="M2_REPO/org/jmock/jmock/2.4.0/jmock-2.4.0.jar"/>
