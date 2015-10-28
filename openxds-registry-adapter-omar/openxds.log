@@ -1,0 +1,10 @@
+2015-10-27 20:25:04,409 INFO  [org.freebxml.omar.server.common.RegistryProperties] Loading omar properties...
+2015-10-27 20:25:04,417 INFO  [org.freebxml.omar.server.persistence.rdb.SQLPersistenceManagerImpl] dbURL: jdbc:postgresql://localhost:5432/openxds
+2015-10-27 20:25:05,138 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:f26abbcb-ac74-4422-8a30-edb644bbc1a9 cannot be found.
+2015-10-27 20:25:05,153 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4 cannot be found.
+2015-10-27 20:25:05,166 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:5737b14c-8a1a-4539-b659-e03a34a5e1e4 cannot be found.
+2015-10-27 20:25:05,180 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:a7ae438b-4bc2-4642-93e9-be891f7bb155 cannot be found.
+2015-10-27 20:25:05,192 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:51224314-5390-4169-9b91-b1980040715a cannot be found.
+2015-10-27 20:25:05,205 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:10cae35a-c7f9-4cf5-b61e-fc3278ffb578 cannot be found.
+2015-10-27 20:25:05,218 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:14d4debf-8f97-4251-9a74-a90016b0af0d cannot be found.
+2015-10-27 20:25:05,231 DEBUG [org.openhealthtools.openxds.registry.adapter.omar31.XdsRegistryQueryServiceTest] The object of type AdhocQuery and id urn:uuid:958f3006-baad-4929-a4de-ff1114824431 cannot be found.

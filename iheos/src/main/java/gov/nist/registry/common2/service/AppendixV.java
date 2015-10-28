@@ -4,7 +4,6 @@ import gov.nist.registry.common2.exception.XdsFormatException;
 import gov.nist.registry.common2.exception.XdsInternalException;
 import gov.nist.registry.common2.exception.XdsWSException;
 import gov.nist.registry.common2.registry.Response;
-import gov.nist.registry.ws.evs.Evs;
 
 import javax.xml.namespace.QName;
 
@@ -14,8 +13,8 @@ import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openhealthtools.openxds.log.LogMessage;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.syslog.LogMessage;
+import org.openhealthtools.openexchange.syslog.LoggerException;
 
 public abstract class AppendixV {
 	private static final Log logger = LogFactory.getLog(AppendixV.class);
@@ -123,18 +122,20 @@ public abstract class AppendixV {
 		
 //		generateAuditLog(response);
 		
-		if (log_message == null) {
+		/*if (log_message == null) {
 			logger.fatal("\nFATAL ERROR: AppendixV.log_response(): log_message is null\n");
 			return;
-		}
+		}*/
 		try {
-			if (response.has_errors()) {
-				log_message.setPass(false);
-				log_message.addErrorParam("Errors", response.getErrorsAndWarnings());
-			} else
-				log_message.setPass(true);
-
-			log_message.addOtherParam("Response", response.getResponse().toString());
+			if (log_message != null){
+				if (response.has_errors()) {
+					log_message.setPass(false);
+					log_message.addErrorParam("Errors", response.getErrorsAndWarnings());
+				} else
+					log_message.setPass(true);
+	
+				log_message.addOtherParam("Response", response.getResponse().toString());
+			}	
 		}
 		catch (LoggerException e) {
 			logger.error("**************ERROR: Logger exception attempting to return to user");

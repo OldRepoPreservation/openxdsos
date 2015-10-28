@@ -1,7 +1,5 @@
 package gov.nist.registry.common2.registry;
 
-import gov.nist.registry.common2.exception.XdsInternalException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,6 +7,8 @@ import java.util.List;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
+
+import gov.nist.registry.common2.exception.XdsInternalException;
 
 public class IdParser {
 	Metadata m;
@@ -139,6 +139,7 @@ public class IdParser {
 			String uuid = UuidAllocator.allocate();
 			uuids.add(uuid);    // can index uuids like symbolic_names
 			att.setAttributeValue(uuid);
+			System.out.println("Assigning UUID: " + uuid + " to symbolic name " + name);
 			assignedUuids.put(name, uuid);
 		}
 
@@ -174,7 +175,6 @@ public class IdParser {
 		OMElement req = MetadataSupport.om_factory.createOMElement("DeprecateObjectsRequest", MetadataSupport.ebLcm3);
 		req.addChild(mk_object_ref_list(uuids));
 		return req;
-
 	}
 
 	private OMElement mk_object_ref_list(List uuids) {

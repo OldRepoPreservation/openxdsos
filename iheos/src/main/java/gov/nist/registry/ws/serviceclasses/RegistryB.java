@@ -88,6 +88,20 @@ public class RegistryB  extends AbstractRegistry  {
 
 	}
 
+	protected void validateRemoveTransaction(OMElement ror)
+	throws XdsValidationException {
+		forceForcedError();
+		OMNamespace ns = ror.getNamespace();
+		String ns_uri =  ns.getNamespaceURI();
+		if (ns_uri == null || ! ns_uri.equals(MetadataSupport.ebLcm3.getNamespaceURI())) 
+			throw new XdsValidationException("Invalid namespace on " + ror.getLocalName() + " (" + ns_uri + ")");
+
+		String type = getRTransactionName(ror);
+
+		if (!type.startsWith("RemoveObjectsRequest"))
+			throw new XdsValidationException("Only RemoveObjectsRequest is acceptable on this endpoint, found " + ror.getLocalName());
+	}
+
 	protected void validateQueryInputDecoration(OMElement sor, AdhocQueryRequest a)
 	throws XdsValidationException {
 

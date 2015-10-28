@@ -14,16 +14,21 @@ import java.util.List;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openhealthtools.openxds.log.LogMessage;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.syslog.LogMessage;
+import org.openhealthtools.openexchange.syslog.LoggerException;
 
-public class Structure {
+public class Structure
+{
+	private final static String[] AVAILABILITY_STATUS_ASSOCIATION_SLOT_NAMES = { "NewStatus", "OriginalStatus" };
+	private final static String[] AVAILABILITY_STATUS_VALID_VALUES = { 
+			"urn:oasis:names:tc:ebxml-regrep:StatusType:Deprecated",
+			"urn:oasis:names:tc:ebxml-regrep:StatusType:Approved"		
+	};
 	Metadata m;
 	RegistryErrorList rel;
 	boolean is_submit;
 	LogMessage log_message;
 	private final static Log logger = LogFactory.getLog(Structure.class);
-
 
 	public Structure(Metadata m, boolean is_submit) throws XdsInternalException {
 		this.m = m;
@@ -34,7 +39,7 @@ public class Structure {
 		log_message = null;
 	}
 
-	public Structure(Metadata m, boolean is_submit, RegistryErrorList rel, 	LogMessage log_message) throws XdsInternalException {
+	public Structure(Metadata m, boolean is_submit, RegistryErrorList rel, LogMessage log_message) throws XdsInternalException {
 		this.m = m;
 		this.is_submit = is_submit;
 		this.rel = rel;
@@ -45,7 +50,6 @@ public class Structure {
 		submission_structure();
 
 	}
-
 
 	void submission_structure()  throws MetadataException, MetadataValidationException, LoggerException, XdsException {
 		ss_doc_fol_must_have_ids();
@@ -77,10 +81,12 @@ public class Structure {
 			boolean target_is_included_is_doc = m.getExtrinsicObjectIds().contains(a_target); 
 
 			if (a_source.equals(ss_id)) {
-				if ( !a_type.equals(assoc_type("HasMember"))) {
-					err("Association referencing Submission Set has type " + a_type + " but only type " + assoc_type("HasMember") + " is allowed");
+				if ( !a_type.equals(assoc_type("HasMember")) && 
+						!a_type.equals(MetadataSupport.UPDATE_AVAILABILITY_ASSOCIATION_TYPE)) {
+					err("Association referencing Submission Set has type " + a_type + " but only type " + assoc_type("HasMember") + " or " + 
+							MetadataSupport.UPDATE_AVAILABILITY_ASSOCIATION_TYPE + " is allowed");
 				}
-				if (target_is_included_is_doc) {
+				if (target_is_included_is_doc && !m.isUpdate()) {
 					if ( ! m.hasSlot(assoc, "SubmissionSetStatus")) {
 						err("Association " +
 								assoc.getAttributeValue(MetadataSupport.id_qname) +
@@ -144,29 +150,51 @@ public class Structure {
 
 			boolean target_is_included_doc = m.getExtrinsicObjectIds().contains(target);
 
-			String ss_status = m.getSlotValue(assoc, "SubmissionSetStatus", 0);
-
-			if ( target_is_included_doc ) {
-
-				if (ss_status == null || ss_status.equals("")) {
-					err("SubmissionSetStatus Slot on Submission Set association has no value");
-				} else if (	ss_status.equals("Original")) {
-					if ( !m.containsObject(target)) 
-						err("SubmissionSetStatus Slot on Submission Set association has value 'Original' but the targetObject " + target + " references an object not in the submission");
-				} else if (	ss_status.equals("Reference")) {
-					if (m.containsObject(target))
-						err("SubmissionSetStatus Slot on Submission Set association has value 'Reference' but the targetObject " + target + " references an object in the submission");
+			if (type.equals(MetadataSupport.HAS_MEMBER_ASSOCIATION_TYPE)) {
+				String ss_status = m.getSlotValue(assoc, "SubmissionSetStatus", 0);
+	
+				if ( target_is_included_doc ) {
+	
+					if (ss_status == null || ss_status.equals("")) {
+						err("SubmissionSetStatus Slot on Submission Set association has no value");
+					} else if (	ss_status.equals("Original")) {
+						if ( !m.containsObject(target)) 
+							err("SubmissionSetStatus Slot on Submission Set association has value 'Original' but the targetObject " + target + " references an object not in the submission");
+					} else if (	ss_status.equals("Reference")) {
+						if (m.containsObject(target))
+							err("SubmissionSetStatus Slot on Submission Set association has value 'Reference' but the targetObject " + target + " references an object in the submission");
+					} else {
+						err("SubmissionSetStatus Slot on Submission Set association has unrecognized value: " + ss_status);
+					}
 				} else {
-					err("SubmissionSetStatus Slot on Submission Set association has unrecognized value: " + ss_status);
+					if (ss_status != null && !ss_status.equals("Reference")) 
+						err("A SubmissionSet Assocation has the SubmissionSetStatus Slot but the target ExtrinsicObject is not part of the Submission");
+						
 				}
-			} else {
-				if (ss_status != null && !ss_status.equals("Reference")) 
-					err("A SubmissionSet Assocation has the SubmissionSetStatus Slot but the target ExtrinsicObject is not part of the Submission");
+			} else if (type.equals(MetadataSupport.UPDATE_AVAILABILITY_ASSOCIATION_TYPE)) {
+				
+				for (String slotName : AVAILABILITY_STATUS_ASSOCIATION_SLOT_NAMES) {
 					
+					String status = m.getSlotValue(assoc, slotName, 0);
+				
+					if (status == null || status.equals("")) {
+						err(slotName + " Slot on Submission Set association has no value");
+					} else if (!validAvailabilityStatusTypeValue(status)) {
+						err(MetadataSupport.UPDATE_AVAILABILITY_ASSOCIATION_TYPE + " Slot on Submission Set association has unknown value '" + status + "'");
+					}
+				}
 			}
 		}
 	}
 
+	private boolean validAvailabilityStatusTypeValue(String status) {
+		for (String valid : AVAILABILITY_STATUS_VALID_VALUES) {
+			if (status.trim().equals(valid)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	void ss_status_single_value() {
 		List assocs = m.getAssociations();
@@ -321,9 +349,12 @@ public class Structure {
 					if ( !a_type.startsWith(MetadataSupport.xdsB_ihe_assoc_namespace_uri))
 						err("XDS.b requires namespace prefix urn:ihe:iti:2007:AssociationType on association type " + simpleType )	;
 				} else {
-					if ( !a_type.startsWith(MetadataSupport.xdsB_eb_assoc_namespace_uri))
-						err("XDS.b requires namespace prefix urn:oasis:names:tc:ebxml-regrep:AssociationType on association type " + simpleType )	;
-
+					if ( !a_type.startsWith(MetadataSupport.xdsB_eb_assoc_namespace_uri) &&
+							!a_type.startsWith(MetadataSupport.IHE_XDSB_ASSOCIATION_TYPE_NAMESPACE)) {
+						err("XDS.b requires namespace prefix urn:oasis:names:tc:ebxml-regrep:AssociationType or " + 
+							MetadataSupport.IHE_XDSB_ASSOCIATION_TYPE_NAMESPACE + 
+							" on association type " + simpleType )	;
+					}
 				}
 			}
 		}

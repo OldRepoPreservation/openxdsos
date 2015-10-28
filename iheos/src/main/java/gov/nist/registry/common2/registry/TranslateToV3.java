@@ -1,14 +1,13 @@
 package gov.nist.registry.common2.registry;
 
-import gov.nist.registry.common2.exception.XdsInternalException;
-import gov.nist.registry.common2.registry.TranslateToV2.Att;
-import gov.nist.registry.common2.xml.Util;
-
 import java.util.Iterator;
 
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
+
+import gov.nist.registry.common2.exception.XdsInternalException;
+import gov.nist.registry.common2.xml.Util;
 
 public class TranslateToV3 extends Translate {
 	int id_count = 1;

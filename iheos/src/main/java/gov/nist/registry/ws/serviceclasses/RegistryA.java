@@ -77,6 +77,11 @@ public class RegistryA  extends AbstractRegistry  {
 
 	}
 
+	@Override
+	protected void validateRemoveTransaction(OMElement sor) throws XdsValidationException {
+		
+	}
+
 	protected void validateQueryInputDecoration(OMElement sor,
 			gov.nist.registry.ws.AdhocQueryRequest a)
 			throws XdsValidationException {
@@ -86,6 +91,4 @@ public class RegistryA  extends AbstractRegistry  {
 			gov.nist.registry.ws.AdhocQueryRequest a, OMElement result)
 			throws XdsValidationException {
 	}
-
-
 }

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2009-2010 Misys Open Source Solutions (MOSS) and others
+ *  Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -116,5 +116,32 @@ public interface XdsRegistryLifeCycleService {
      * @throws RegistryLifeCycleException if any object deprecation fails
      */    
 	public OMElement deprecateObjects(OMElement request, RegistryLifeCycleContext context) throws RegistryLifeCycleException;
-
+	
+	/**
+	 * The RemoveObjectsRequest is used by a client to remove one or more existing RegistryObject and/or
+	 * repository items from the registry.
+	 * <p>
+	 * RemoveObjectsRequest
+	 * Syntax:
+	 * <pre>
+	 * <element name="RemoveObjectsRequest">
+	 * <complexType>
+	 *    <complexContent>
+	 *       <extension base="rs:RegistryRequestType">
+	 *          <sequence>
+	 * 			   <element ref="rim:ObjectRefList" minOccurs="0" maxOccurs="1" />
+	 *          </sequence>
+	 * 			<attribute name="deletionScope"
+	 *				default="urn:oasis:names:tc:ebxml-regrep:DeletionScopeType:DeleteAll"
+	 *				type="rim:referenceURI" use="optional"/>
+	 * 		 </extension>
+	 *    </complexContent>
+	 * </complexTy
+	 * 
+	 * @param request
+	 * @param context
+	 * @return
+	 * @throws RegistryLifeCycleException
+	 */
+	public OMElement removeObjects(OMElement request, RegistryLifeCycleContext context) throws RegistryLifeCycleException;
 }

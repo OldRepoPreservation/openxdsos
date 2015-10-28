@@ -20,20 +20,19 @@
 
 package org.openhealthtools.openxds.registry.patient;
 
-import java.util.List;
-
-import org.openhealthtools.common.utils.IdGenerator;
-import org.junit.Before;
-import org.junit.Test;
-import org.openhealthtools.openexchange.datamodel.Identifier;
-import org.openhealthtools.openexchange.datamodel.Patient;
-import org.openhealthtools.openexchange.datamodel.PatientIdentifier;
-import org.openhealthtools.openxds.registry.api.XdsRegistryPatientService;
-
 import static org.junit.Assert.assertEquals;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.openhealthtools.common.utils.IdGenerator;
+import org.openhealthtools.openexchange.datamodel.Identifier;
+import org.openhealthtools.openexchange.datamodel.Patient;
+import org.openhealthtools.openexchange.datamodel.PatientIdentifier;
+import org.openhealthtools.openxds.registry.api.XdsRegistryPatientService;
 
 /**
  * This class used to test the Xds patient manager.

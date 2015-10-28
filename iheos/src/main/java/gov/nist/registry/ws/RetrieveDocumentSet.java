@@ -25,21 +25,20 @@ import org.apache.axiom.om.OMText;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openhealthtools.common.ihe.IheActor;
-import org.openhealthtools.common.ws.server.IheHTTPServer;
-import org.openhealthtools.openexchange.actorconfig.net.IConnectionDescription;
 import org.openhealthtools.openexchange.audit.ActiveParticipant;
 import org.openhealthtools.openexchange.audit.AuditCodeMappings;
 import org.openhealthtools.openexchange.audit.IheAuditTrail;
 import org.openhealthtools.openexchange.audit.ParticipantObject;
 import org.openhealthtools.openexchange.audit.TypeValuePair;
 import org.openhealthtools.openexchange.config.PropertyFacade;
+import org.openhealthtools.openexchange.syslog.LogMessage;
+import org.openhealthtools.openexchange.syslog.LoggerException;
 import org.openhealthtools.openexchange.utils.Pair;
-import org.openhealthtools.openxds.XdsFactory;
-import org.openhealthtools.openxds.log.LogMessage;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.utils.Triple;
+import org.openhealthtools.openxds.common.XdsFactory;
 import org.openhealthtools.openxds.repository.api.RepositoryException;
 import org.openhealthtools.openxds.repository.api.RepositoryRequestContext;
+import org.openhealthtools.openxds.repository.api.XdsRepository;
 import org.openhealthtools.openxds.repository.api.XdsRepositoryItem;
 import org.openhealthtools.openxds.repository.api.XdsRepositoryService;
 import org.openhealthtools.openxua.api.XuaException;
@@ -47,9 +46,8 @@ import org.openhealthtools.openxua.api.XuaException;
 public class RetrieveDocumentSet extends XdsCommon {
     ContentValidationService validater;
     String registry_endpoint = null;
-    MessageContext messageContext;
     boolean optimize = true;
-    IConnectionDescription connection = null;
+	private XdsRepository actor = null;
     /* The IHE Audit Trail for this actor. */
     private IheAuditTrail auditLog = null;
     private final static Log logger = LogFactory.getLog(RetrieveDocumentSet.class);
@@ -58,21 +56,16 @@ public class RetrieveDocumentSet extends XdsCommon {
         this.log_message = log_message;
         this.messageContext = messageContext;
 		transaction_type = RET_transaction;
-		IheHTTPServer httpServer = (IheHTTPServer) messageContext.getTransportIn().getReceiver();
-        try {
-            IheActor actor = httpServer.getIheActor();
-            if (actor == null) {
-                throw new XdsInternalException("Cannot find XdsRepository actor configuration.");
-            }
-            connection = actor.getConnection();
-            if (connection == null) {
-                throw new XdsInternalException("Cannot find Server connection configuration.");
-            }
-            auditLog = actor.getAuditTrail();
-            init(new RetrieveMultipleResponse(), xds_version, messageContext);
-        }
 
-        catch (XdsInternalException e) {
+		try {
+			actor = XdsFactory.getRepositoryActor(); 
+    		if (actor == null) {
+    			throw new XdsInternalException("Cannot find XdsRepository actor configuration.");			
+    		}
+    		
+            auditLog = (IheAuditTrail)actor.getAuditTrail();
+            init(new RetrieveMultipleResponse(), xds_version, messageContext);
+        } catch (XdsInternalException e) {
             logger.fatal(logger_exception_details(e));
             response.add_error("XDSRepositoryError", e.getMessage(), ExceptionUtil.exception_details(e), log_message);
         }
@@ -127,7 +120,8 @@ public class RetrieveDocumentSet extends XdsCommon {
         } catch (XdsInternalException e) {
             logger.fatal(logger_exception_details(e));
             try {
-                log_message.addErrorParam("Internal Error", "Error generating response from Ret.b");
+            	if (log_message != null)
+            		log_message.addErrorParam("Internal Error", "Error generating response from Ret.b");
             }
             catch (LoggerException e1) {
                 logger.fatal(logger_exception_details(e1));
@@ -149,7 +143,7 @@ public class RetrieveDocumentSet extends XdsCommon {
 
     ArrayList<OMElement> retrieve_documents(OMElement rds) throws MetadataException, XdsException {
         ArrayList<OMElement> document_responses = new ArrayList<OMElement>();
-        ArrayList<Pair<String,String>> doclist = new ArrayList<Pair<String,String>>();
+        ArrayList<Triple<String,String,String>> doclist = new ArrayList<Triple<String,String,String>>();
         for (OMElement doc_request : MetadataSupport.childrenWithLocalName(rds, "DocumentRequest")) {
             //HashMap<String, String> docMap = new HashMap<String, String>();
             String rep_id = null;
@@ -176,7 +170,8 @@ public class RetrieveDocumentSet extends XdsCommon {
             OMElement home_ele = MetadataSupport.firstChildWithLocalName(doc_request, "HomeCommunityId");
             if (home_ele != null)
                 home = home_ele.getText();
-            Pair<String,String> doc = new Pair<String,String>(doc_id, rep_id);
+            
+        	Triple<String,String,String> doc = new Triple<String,String,String>(doc_id, rep_id, home);
             doclist.add(doc);
             OMElement document_response = retrieve_document(rep_id, doc_id, home);
 
@@ -203,7 +198,7 @@ public class RetrieveDocumentSet extends XdsCommon {
         
         try {
             RepositoryRequestContext context = new RepositoryRequestContext();
-            context.setConnection(connection);
+            context.setActorDescription(actor.getActorDescription());
             repositoryItem = rm.getRepositoryItem(doc_id, context);
         } catch (RepositoryException e) {
             throw new XdsException("Cannot find repository item for document id, " + doc_id);
@@ -251,7 +246,7 @@ public class RetrieveDocumentSet extends XdsCommon {
      *
      * @throws MetadataException
      */
-    private void auditLog(ArrayList<Pair<String,String>> doclist, AuditCodeMappings.AuditTypeCodes eventTypeCode) throws MetadataException {
+    private void auditLog(ArrayList<Triple<String,String,String>> doclist, AuditCodeMappings.AuditTypeCodes eventTypeCode) throws MetadataException {
         if (auditLog == null)
             return;
 
@@ -268,15 +263,17 @@ public class RetrieveDocumentSet extends XdsCommon {
         
         ActiveParticipant dest = new ActiveParticipant();
         dest.setAccessPointId(localIP);
-        //TODO: Needs to be improved
-        String userid = "http://" + connection.getHostname() + ":" + connection.getPort() + "/axis2/services/xdsrepositoryb";
+        String userid = actor.getServiceEndpoint(isHttps());
         dest.setUserId(userid);
         //Document Info
         Collection<ParticipantObject> docs = new ArrayList<ParticipantObject>();
-        for (Pair<String,String> doc : doclist) {
+        for (Triple<String,String,String> doc : doclist) {
             ParticipantObject docObj = new ParticipantObject();
-            docObj.setId(doc.first.toString());
-            docObj.addDetail(new TypeValuePair("RepositoryUniqueId", doc.second.toString()));
+            docObj.setId(doc.first);
+            docObj.addDetail(new TypeValuePair("RepositoryUniqueId", doc.second));
+            if (doc.third != null) {
+            	docObj.addDetail(new TypeValuePair("ihe:homeCommunityID", doc.third));
+            }
             docs.add(docObj);
         }
         //Finally Log it.

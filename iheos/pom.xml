@@ -24,7 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-config</artifactId>
+			<artifactId>openxds-core</artifactId>
 			<version>${release.version}</version>
 		</dependency>
 		<dependency>
@@ -35,19 +35,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>common-ws</artifactId>
-			<version>${release.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>common-utils</artifactId>
-			<version>${release.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
 			<artifactId>openxds-log</artifactId>
 			<version>${release.version}</version>
-		</dependency>
+		</dependency>	
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>

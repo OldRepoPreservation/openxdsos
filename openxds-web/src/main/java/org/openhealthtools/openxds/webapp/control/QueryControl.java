@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2009-2010 Misys Open Source Solutions (MOSS) and others
+ *  Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -492,7 +492,7 @@ public class QueryControl {
 		return metadata;
 	}
 
-	public Xdsview displayDetail(String verb, Map<String, String[]> parms, HttpUtils h) {
+	public Xdsview displayDetail(String verb, Map<String, String[]> parms, HttpUtils h, String context) {
 		String localid = getParm(parms, "id");
 		String cntl = getParm(parms, "cntl");
 		int cntl_i = 0;
@@ -511,7 +511,7 @@ public class QueryControl {
 				System.out.println("verb " + verb);
 				System.out.println("id " + localid);
 				System.out.println("docids " + m.getExtrinsicObjectIds());
-				Xdsview xv = new Xdsview(m, h);
+				Xdsview xv = new Xdsview(m, h, context);
 				xv.start();
 				if (verb.equals("details")) {
 					xv.displayRegistryObject(m, localid);

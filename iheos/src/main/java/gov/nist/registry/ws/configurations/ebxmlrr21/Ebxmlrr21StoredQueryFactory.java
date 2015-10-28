@@ -17,6 +17,7 @@ import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21FindSubmissionSets;
 import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetAssociations;
 import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetDocuments;
 import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetDocumentsAndAssociations;
+import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetDocumentsByLogicalId;
 import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetFolderAndContents;
 import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetFolders;
 import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetFoldersForDocument;
@@ -25,8 +26,8 @@ import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetSubmissionSetAndContents;
 import gov.nist.registry.ws.sq.ebxmlrr21.EbXML21GetSubmissionSets;
 
 import org.apache.axiom.om.OMElement;
-import org.openhealthtools.openxds.log.LogMessage;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.syslog.LogMessage;
+import org.openhealthtools.openexchange.syslog.LoggerException;
 
 /**
  * Factory class for Stored Queries going to the ebxmlrr2.1-final1 registry implementation. 
@@ -115,6 +116,10 @@ public class Ebxmlrr21StoredQueryFactory extends StoredQueryFactory {
 		else if (query_id.equals(MetadataSupport.SQ_GetDocuments)) {
 			setTestMessage("GetDocuments");
 			storedQueryImpl = new EbXML21GetDocuments(sqs);
+		}
+		else if (query_id.equals(MetadataSupport.SQ_GetDocumentsByLogicalId)) {
+			setTestMessage("GetDocumentsByLogicalId");
+			storedQueryImpl = new EbXML21GetDocumentsByLogicalId(sqs);
 		}
 		else if (query_id.equals(MetadataSupport.SQ_GetFolders)) {
 			setTestMessage("GetFolders");
@@ -225,6 +230,17 @@ public class Ebxmlrr21StoredQueryFactory extends StoredQueryFactory {
 	 */
 	public Metadata GetDocuments(StoredQuerySupport sqs) throws XdsException, LoggerException {
 		return new EbXML21GetDocuments(sqs).runSpecific();
+	}
+
+	/**
+	 * Stored Query API call.
+	 * @param sqs
+	 * @return Metadata object
+	 * @throws XdsException
+	 * @throws LoggerException
+	 */
+	public Metadata GetDocumentsByLogicalId(StoredQuerySupport sqs) throws XdsException, LoggerException {
+		return new EbXML21GetDocumentsByLogicalId(sqs).runSpecific();
 	}
 
 	/**

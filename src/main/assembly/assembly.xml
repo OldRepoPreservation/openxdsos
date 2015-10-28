@@ -1,0 +1,82 @@
+<!--
+
+
+    Copyright (C) 2002-2012 "SYSNET International, Inc."
+    support@sysnetint.com [http://www.sysnetint.com]
+
+    This file is part of OpenEMPI.
+
+    OpenEMPI is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<assembly>
+	<id>openxds</id>
+	<formats>
+		<format>zip</format>
+		<format>tar.gz</format>
+	</formats>
+	<files>
+		<file>
+			<source>openxds-web/target/openxds-web.war</source>
+			<outputDirectory>/</outputDirectory>
+			<destName>openxds-web.war</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
+			<source>integrationtests/src/test/resources/data/update_document_15802a.xml</source>
+			<outputDirectory>/data</outputDirectory>
+			<destName>update_document_15802a.xml</destName>
+			<fileMode>0644</fileMode>
+		</file>
+		<file>
+			<source>integrationtests/src/test/resources/data/update_document_15802b.xml</source>
+			<outputDirectory>/data</outputDirectory>
+			<destName>update_document_15802b.xml</destName>
+			<fileMode>0644</fileMode>
+		</file>
+		<file>
+			<source>integrationtests/src/test/resources/data/submit_document_for_update_first.xml</source>
+			<outputDirectory>/data</outputDirectory>
+			<destName>submit_document_for_update_first.xml</destName>
+			<fileMode>0644</fileMode>
+		</file>
+		<file>
+			<source>integrationtests/src/test/resources/data/submit_document_for_update_second.xml</source>
+			<outputDirectory>/data</outputDirectory>
+			<destName>submit_document_for_update_second.xml</destName>
+			<fileMode>0644</fileMode>
+		</file>
+	</files>
+	<fileSets>
+		<fileSet>
+			<directory>openxds-registry-adapter-omar/src/main/resources</directory>
+			<outputDirectory>/data</outputDirectory>
+			<includes>
+			   <include>*.xml</include>
+			   <include>*.sql</include>
+			   <include>*.properties</include>
+			</includes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>conf</directory>
+			<outputDirectory>/conf</outputDirectory>
+			<useDefaultExcludes>true</useDefaultExcludes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+	</fileSets>
+</assembly>

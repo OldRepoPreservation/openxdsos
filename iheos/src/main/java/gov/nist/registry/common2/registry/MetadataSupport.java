@@ -43,6 +43,9 @@ public class MetadataSupport {
 
 	static public String xdsB_eb_assoc_namespace_uri = "urn:oasis:names:tc:ebxml-regrep:AssociationType";
 	static public String xdsB_ihe_assoc_namespace_uri = "urn:ihe:iti:2007:AssociationType";
+	public final static String IHE_XDSB_ASSOCIATION_TYPE_NAMESPACE = "urn:ihe:iti:2010:AssociationType";
+	public final static String HAS_MEMBER_ASSOCIATION_TYPE = "urn:oasis:names:tc:ebxml-regrep:AssociationType:HasMember";
+	public final static String UPDATE_AVAILABILITY_ASSOCIATION_TYPE = "urn:ihe:iti:2010:AssociationType:UpdateAvailabilityStatus";
 	
 	static public String ws_addressing_namespace_uri = "http://www.w3.org/2005/08/addressing";
 	static public OMNamespace ws_addressing_namespace = om_factory.createOMNamespace(ws_addressing_namespace_uri, "wsa");
@@ -80,6 +83,8 @@ public class MetadataSupport {
 	public static QName classificationnode_qname = new QName("classificationNode");
 
 	public static QName id_qname = new QName("id");
+	
+	public static QName lid_qname = new QName("lid");
 
 	public static QName registry_object_qname = new QName("registryObject");
 
@@ -128,6 +133,7 @@ public class MetadataSupport {
 	public static String SQ_FindFolders = "urn:uuid:958f3006-baad-4929-a4de-ff1114824431";
 	public static String SQ_GetAll = "urn:uuid:10b545ea-725c-446d-9b95-8aeb444eddf3";
 	public static String SQ_GetDocuments = "urn:uuid:5c4f972b-d56b-40ac-a5fc-c8ca9b40b9d4";
+	public static String SQ_GetDocumentsByLogicalId = "urn:uuid:6b5aea1a-874d-4603-a4bc-96a0a7b38446";
 	public static String SQ_GetFolders = "urn:uuid:5737b14c-8a1a-4539-b659-e03a34a5e1e4";
 	public static String SQ_GetAssociations = "urn:uuid:a7ae438b-4bc2-4642-93e9-be891f7bb155";
 	public static String SQ_GetDocumentsAndAssociations = "urn:uuid:bab9529a-4a10-40b3-a01f-f68a615d247a";
@@ -144,6 +150,7 @@ public class MetadataSupport {
 		if (id.equals(SQ_FindFolders)) return true;
 		if (id.equals(SQ_GetAll)) return true;
 		if (id.equals(SQ_GetDocuments)) return true;
+		if (id.equals(SQ_GetDocumentsByLogicalId)) return true;
 		if (id.equals(SQ_GetFolders)) return true;
 		if (id.equals(SQ_GetAssociations)) return true;
 		if (id.equals(SQ_GetDocumentsAndAssociations)) return true;

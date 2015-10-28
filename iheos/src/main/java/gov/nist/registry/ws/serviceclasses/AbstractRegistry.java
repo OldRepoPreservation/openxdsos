@@ -13,19 +13,21 @@ import gov.nist.registry.common2.registry.XdsCommon;
 import gov.nist.registry.common2.service.AppendixV;
 import gov.nist.registry.ws.AdhocQueryRequest;
 import gov.nist.registry.ws.ContentValidationService;
+import gov.nist.registry.ws.RemoveObjectsRequest;
 import gov.nist.registry.ws.SubmitObjectsRequest;
+import gov.nist.registry.ws.SubmitObjectsRequestForUpdate;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.syslog.LoggerException;
 
-public abstract class AbstractRegistry extends XdsService implements
-ContentValidationService {
+public abstract class AbstractRegistry extends XdsService implements ContentValidationService {
 
 	abstract protected void validateWS(boolean isSQ) throws XdsWSException;
 	abstract protected short getXdsVersion(); 
 	abstract protected void validateQueryTransaction(OMElement sor) throws XdsValidationException, MetadataValidationException, XdsInternalException;
 	abstract protected void validateSubmitTransaction(OMElement sor) throws XdsValidationException;
+	abstract protected void validateRemoveTransaction(OMElement sor) throws XdsValidationException;
 	abstract public boolean runContentValidationService(Metadata m, Response response) throws MetadataException;
 	abstract public String getServiceName();
 	abstract protected void validateQueryInputDecoration(OMElement sor, AdhocQueryRequest a) throws XdsValidationException;
@@ -41,6 +43,8 @@ ContentValidationService {
 			return "SQL";
 		else if (ahqr.getLocalName().equals("SubmitObjectsRequest"))
 			return "SubmitObjectsRequest";
+		else if (ahqr.getLocalName().equals("RemoveObjectsRequest"))
+			return "RemoveObjectsRequest";
 		else
 			return "Unknown";
 	}
@@ -54,12 +58,13 @@ ContentValidationService {
 	}
 
 
-	public OMElement SubmitObjectsRequest(OMElement sor) throws AxisFault {
+	public OMElement DocumentRegistry_RegisterDocumentSet_b(OMElement sor) throws AxisFault {
 		try {
 			OMElement startup_error = beginTransaction(getRTransactionName(sor), sor, AppendixV.REGISTRY_ACTOR);
 			if (startup_error != null)
 				return startup_error;
-			log_message.setTestMessage(getRTransactionName(sor));
+			if(log_message != null)
+				log_message.setTestMessage(getRTransactionName(sor));
 
 			validateWS(false);
 
@@ -76,11 +81,59 @@ ContentValidationService {
 		}
 	}
 
-	public OMElement AdhocQueryRequest(OMElement ahqr) throws AxisFault {
+	public OMElement DocumentRegistry_UpdateDocumentSet(OMElement sor) throws AxisFault {
+		try {
+			OMElement startup_error = beginTransaction(getRTransactionName(sor), sor, AppendixV.REGISTRY_ACTOR);
+			if (startup_error != null)
+				return startup_error;
+			if(log_message != null)
+				log_message.setTestMessage(getRTransactionName(sor));
+
+			validateWS(false);
+
+			validateSubmitTransaction(sor);
+
+			SubmitObjectsRequest s = new SubmitObjectsRequestForUpdate(log_message, getXdsVersion(), getMessageContext());
+			s.setClientIPAddress(getClientIPAddress());
+			s.setContentValidationService(this);
+			OMElement result = s.submitObjectsRequest(sor);
+			endTransaction(s.getStatus());
+			return result;
+		} catch (Exception e) {
+			return endTransaction(sor, e, AppendixV.REGISTRY_ACTOR, "");
+		}
+	}
+	
+	public OMElement DocumentRegistry_DeleteDocumentSet(OMElement ror) throws AxisFault {
+		try {
+			OMElement startup_error = beginTransaction(getRTransactionName(ror), ror, AppendixV.REGISTRY_ACTOR);
+			if (startup_error != null)
+				return startup_error;
+			if(log_message != null)
+				log_message.setTestMessage(getRTransactionName(ror));
+
+			validateWS(false);
+
+			validateRemoveTransaction(ror);
+
+			// TODO: Need to add support here for the implementation of the method
+			RemoveObjectsRequest request = new RemoveObjectsRequest(log_message, getXdsVersion(), getMessageContext());
+			request.setClientIPAddress(getClientIPAddress());
+			request.setContentValidationService(this);
+			OMElement result = request.removeObjectsRequest(ror);
+			endTransaction(request.getStatus());
+			return result;
+		} catch (Exception e) {
+			return endTransaction(ror, e, AppendixV.REGISTRY_ACTOR, "");
+		}
+	}
+	
+	public OMElement DocumentRegistry_RegistryStoredQuery(OMElement ahqr) throws AxisFault {
 		OMElement startup_error = beginTransaction(getRTransactionName(ahqr), ahqr, AppendixV.REGISTRY_ACTOR);
 		if (startup_error != null)
 			return startup_error;
-		log_message.setTestMessage(getRTransactionName(ahqr));
+		if(log_message != null)
+			log_message.setTestMessage(getRTransactionName(ahqr));
 
 		String type = getRTransactionName(ahqr);
 

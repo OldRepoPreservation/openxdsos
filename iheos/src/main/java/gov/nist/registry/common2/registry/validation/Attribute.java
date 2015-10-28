@@ -170,7 +170,7 @@ public class Attribute {
 			String value = value_ele.getText();
 			List<String> errs = validate_XON(value);
 			for (String err : errs) {
-				err("authorInstituion: " + err);
+				err("authorInstitution: " + err);
 			}
 		}
 	}
@@ -506,8 +506,8 @@ public class Attribute {
 			validate_slot("Document", id, slots, 	"serviceStopTime",			false, 	false, 		true);
 			validate_slot("Document", id, slots, 	"sourcePatientInfo",		true, 	false, 		false);
 
-			validate_slot("Document", id, slots, 	"hash",			 			false, 	!isPnR, 		false);
-			validate_slot("Document", id, slots, 	"size",						false, 	!isPnR, 		true);
+			validate_slot("Document", id, slots, 	"hash",			 			false, 	false, 		false);
+			validate_slot("Document", id, slots, 	"size",						false, 	false, 		true);
 
 			// These are tricky since the validation is based on the metadata format (xds.a or xds.b) instead of
 			// on the transaction. All Stored Queries are encoded in ebRIM 3.0 (xds.b format) but they could

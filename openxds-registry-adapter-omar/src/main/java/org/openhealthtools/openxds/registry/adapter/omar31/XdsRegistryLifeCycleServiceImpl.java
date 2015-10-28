@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2009-2010 Misys Open Source Solutions (MOSS) and others
+ *  Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import org.freebxml.omar.common.spi.RequestContext;
 import org.freebxml.omar.server.security.authentication.AuthenticationServiceImpl;
 import org.oasis.ebxml.registry.bindings.rs.RegistryRequestType;
 import org.oasis.ebxml.registry.bindings.rs.RegistryResponse;
-import org.openhealthtools.openexchange.datamodel.Identifier;
-import org.openhealthtools.openexchange.datamodel.PatientIdentifier;
 import org.openhealthtools.openxds.registry.api.RegistryLifeCycleContext;
 import org.openhealthtools.openxds.registry.api.RegistryLifeCycleException;
 import org.openhealthtools.openxds.registry.api.XdsRegistryLifeCycleService;
@@ -43,60 +41,61 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * This class adapts to the freebXML Omar 3.1 registry and 
- * defines the operations to manipulate XDS Registry
- * objects.
- * 
- * @author <a href="mailto:wenzhi.li@misys.com">Wenzhi Li</a>
- * @author <a href="mailto:anilkumar.reddy@misys.com">Anil kumar</a>
+ * This class adapts to the freebXML Omar 3.1 registry and defines the
+ * operations to manipulate XDS Registry objects.
  *
  */
-public class XdsRegistryLifeCycleServiceImpl implements XdsRegistryLifeCycleService {
+public class XdsRegistryLifeCycleServiceImpl implements XdsRegistryLifeCycleService
+{
 	private static Log log = LogFactory.getLog(XdsRegistryLifeCycleServiceImpl.class);
 	protected static LifeCycleManager lcm = LifeCycleManagerFactory.getInstance().getLifeCycleManager();
 	protected static ConversionHelper helper = ConversionHelper.getInstance();
-	MergePatientDao mergePatientDao =null;
-	public OMElement submitObjects(OMElement request, RegistryLifeCycleContext context)  throws RegistryLifeCycleException {
+	MergePatientDao mergePatientDao = null;
+
+	public OMElement submitObjects(OMElement request, RegistryLifeCycleContext context)
+			throws RegistryLifeCycleException {
 		RequestContext omarContext;
 		RegistryResponse omarResponse = null;
 		OMElement response;
-		
+
 		final String contextId = "org:openhealthexchange:openxds:registry:adapter:omar31:XdsRegistryLifeCycleManager:submitObjects:context";
 		try {
 			InputStream is = new ByteArrayInputStream(request.toString().getBytes("UTF-8"));
 			Object registryRequest = helper.getUnmarsheller().unmarshal(is);
-			//Creating context with request.
-			omarContext = new CommonRequestContext(contextId,(RegistryRequestType) registryRequest);
-			//Adding RegistryOperator role for the user.
+			// Creating context with request.
+			omarContext = new CommonRequestContext(contextId, (RegistryRequestType) registryRequest);
+			// Adding RegistryOperator role for the user.
 			omarContext.setUser(AuthenticationServiceImpl.getInstance().registryOperator);
-			
+
 			// Sending request to OMAR methods.
 			omarResponse = lcm.submitObjects(omarContext);
-			//Create RegistryResponse as OMElement
+			// Create RegistryResponse as OMElement
 			response = helper.omFactory().createOMElement("RegistryResponse", helper.nsRs);
 			response.declareNamespace(helper.nsRs);
 			response.declareNamespace(helper.nsXsi);
 			response.addAttribute("status", omarResponse.getStatus(), null);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			throw new RegistryLifeCycleException(e.getMessage());
 		}
 
 		return response;
 	}
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void mergePatients(String survivingPatient, String mergePatient, 
-			RegistryLifeCycleContext context) throws RegistryLifeCycleException {
-    	 try {
-			 mergePatientDao.mergeDocument(survivingPatient, mergePatient);
-			} catch (Exception e) {
-				throw new RegistryLifeCycleException(e);
-			}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void mergePatients(String survivingPatient, String mergePatient, RegistryLifeCycleContext context)
+			throws RegistryLifeCycleException {
+		try {
+			mergePatientDao.mergeDocument(survivingPatient, mergePatient);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+
+			throw new RegistryLifeCycleException(e);
+		}
 	}
 
-	
-	public OMElement approveObjects(OMElement request, RegistryLifeCycleContext context) throws RegistryLifeCycleException {
+	public OMElement approveObjects(OMElement request, RegistryLifeCycleContext context)
+			throws RegistryLifeCycleException {
 		RequestContext omarContext;
 		RegistryResponse omarResponse = null;
 		InputStream is;
@@ -105,27 +104,28 @@ public class XdsRegistryLifeCycleServiceImpl implements XdsRegistryLifeCycleServ
 		try {
 			is = new ByteArrayInputStream(request.toString().getBytes("UTF-8"));
 			Object registryRequest = helper.getUnmarsheller().unmarshal(is);
-			//Creating context with request.
-			omarContext = new CommonRequestContext(contextId,(RegistryRequestType) registryRequest);
-			//Adding RegistryOperator role for the user.
+			// Creating context with request.
+			omarContext = new CommonRequestContext(contextId, (RegistryRequestType) registryRequest);
+			// Adding RegistryOperator role for the user.
 			omarContext.setUser(AuthenticationServiceImpl.getInstance().registryOperator);
 			// Sending request to OMAR methods.
 			omarResponse = lcm.approveObjects(omarContext);
-			// 
+			//
 			response = helper.omFactory().createOMElement("RegistryResponse", helper.nsRs);
 			response.declareNamespace(helper.nsRs);
 			response.declareNamespace(helper.nsXsi);
 			response.addAttribute("status", omarResponse.getStatus(), null);
-		
-		}  catch (Exception e) {
-			e.printStackTrace();
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			throw new RegistryLifeCycleException(e.getMessage());
 		}
 
 		return response;
 	}
 
-	public OMElement deprecateObjects(OMElement request, RegistryLifeCycleContext context) throws RegistryLifeCycleException {
+	public OMElement deprecateObjects(OMElement request, RegistryLifeCycleContext context)
+			throws RegistryLifeCycleException {
 		RequestContext omarContext;
 		RegistryResponse omarResponse = null;
 		InputStream is;
@@ -134,41 +134,63 @@ public class XdsRegistryLifeCycleServiceImpl implements XdsRegistryLifeCycleServ
 		try {
 			is = new ByteArrayInputStream(request.toString().getBytes("UTF-8"));
 			Object registryRequest = helper.getUnmarsheller().unmarshal(is);
-			//Creating context with request.
-			omarContext = new CommonRequestContext(contextId,(RegistryRequestType) registryRequest);
-			//Adding RegistryOperator role for the user.
+			// Creating context with request.
+			omarContext = new CommonRequestContext(contextId, (RegistryRequestType) registryRequest);
+			// Adding RegistryOperator role for the user.
 			omarContext.setUser(AuthenticationServiceImpl.getInstance().registryOperator);
 			// Sending request to OMAR methods.
 			omarResponse = lcm.deprecateObjects(omarContext);
-			
+
 			response = helper.omFactory().createOMElement("RegistryResponse", helper.nsRs);
 			response.declareNamespace(helper.nsRs);
 			response.declareNamespace(helper.nsXsi);
 			response.addAttribute("status", omarResponse.getStatus(), null);
-		
-		}  catch (Exception e) {
-			e.printStackTrace();
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			throw new RegistryLifeCycleException(e.getMessage());
 		}
 
 		return response;
 	}
+
 	public MergePatientDao getMergePatientDao() {
 		return mergePatientDao;
 	}
+
 	public void setMergePatientDao(MergePatientDao mergePatientDao) {
 		this.mergePatientDao = mergePatientDao;
 	}
-    private PatientIdentifier getPatientIdentifier(String patientId){
-	    	Identifier assigningAuthority = null;
-	    	String[] patient = patientId.split("\\^");
-	    	String patId = patient[0];
-	    	String[] assignAuth = patient[3].split("\\&");
-	    	assigningAuthority =  new Identifier(assignAuth[0], assignAuth[1], assignAuth[2]);
-	    	PatientIdentifier identifier =new PatientIdentifier();
-	    	identifier.setId(patId);
-	    	identifier.setAssigningAuthority(assigningAuthority);
-	    	return identifier;
+
+	@Override
+	public OMElement removeObjects(OMElement request, RegistryLifeCycleContext context)
+			throws RegistryLifeCycleException {
+		RequestContext omarContext;
+		RegistryResponse omarResponse = null;
+		InputStream is;
+		OMElement response;
+		final String contextId = "org:openhealthexchange:openxds:registry:adapter:omar31:XdsRegistryLifeCycleManager:removeObjects:context";
+		try {
+			is = new ByteArrayInputStream(request.toString().getBytes("UTF-8"));
+			Object registryRequest = helper.getUnmarsheller().unmarshal(is);
+			// Creating context with request.
+			omarContext = new CommonRequestContext(contextId, (RegistryRequestType) registryRequest);
+			// Adding RegistryOperator role for the user.
+			omarContext.setUser(AuthenticationServiceImpl.getInstance().registryOperator);
+			// Sending request to OMAR methods.
+			omarResponse = lcm.removeObjects(omarContext);
+
+			response = helper.omFactory().createOMElement("RegistryResponse", helper.nsRs);
+			response.declareNamespace(helper.nsRs);
+			response.declareNamespace(helper.nsXsi);
+			response.addAttribute("status", omarResponse.getStatus(), null);
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new RegistryLifeCycleException(e.getMessage());
+		}
+
+		return response;
 	}
 
 }

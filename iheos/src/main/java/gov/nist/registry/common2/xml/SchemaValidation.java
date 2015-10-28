@@ -20,6 +20,7 @@ import org.openhealthtools.openexchange.utils.StringUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+
 public class SchemaValidation implements MetadataTypes {
 
 	public static String validate(OMElement ele, int metadataType)  throws XdsInternalException {
