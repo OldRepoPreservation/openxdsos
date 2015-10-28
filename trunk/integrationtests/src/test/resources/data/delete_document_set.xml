@@ -1,0 +1,11 @@
+<lcm:RemoveObjectsRequest
+	xmlns="urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0"
+	xmlns:lcm="urn:oasis:names:tc:ebxml-regrep:xsd:lcm:3.0"
+	xmlns:rim="urn:oasis:names:tc:ebxml-regrep:xsd:rim:3.0">
+
+	<ObjectRefList>
+		<ObjectRef id="$doc1"/>
+		<ObjectRef id="$ss-to-doc"/>
+	</ObjectRefList>
+</lcm:RemoveObjectsRequest>
+

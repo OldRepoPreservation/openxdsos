@@ -45,12 +45,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>apache-axis2</artifactId>
-			<version>${project.version}</version>
-			<type>pom</type>
-		</dependency>
-		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
 			<version>${aspectj.version}</version>
@@ -67,17 +61,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>common-utils</artifactId>
-			<version>${release.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
 			<artifactId>openxds-api</artifactId>
 			<version>${release.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-config</artifactId>
+			<artifactId>openxds-core</artifactId>
 			<version>${release.version}</version>
 		</dependency>
 		<dependency>
@@ -110,6 +99,16 @@
 			<artifactId>ehcache</artifactId>
 			<version>1.4.1</version>
 		</dependency>
+		<dependency>
+			<groupId>hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xacml</groupId>
+			<artifactId>sunxacml</artifactId>
+			<version>1.0</version>
+		</dependency>		
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate</artifactId>

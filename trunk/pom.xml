@@ -369,10 +369,6 @@
     </dependencies>
     
     <modules>
-        <module>apache-axis2</module>
-        <module>common-utils</module>
-        <module>common-ws</module>
-        <module>openxds-config</module>
         <module>openxds-log</module>
         <module>iheos</module>
         <module>openxds-api</module>
@@ -381,6 +377,8 @@
         <module>openxds-repository</module>
         <module>openxds-web</module>
     	<module>openxds-registry-patient-openempi</module>
+	<module>jettyembedded</module>
+	<module>integrationtests</module>
   </modules>
 
     <reporting>
@@ -496,9 +494,9 @@
             <id>postgresql</id>
             <properties>
                 <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
-                <jdbc.groupId>postgresql</jdbc.groupId>
+                <jdbc.groupId>org.postgresql</jdbc.groupId>
                 <jdbc.artifactId>postgresql</jdbc.artifactId>
-                <jdbc.version>8.1-407.jdbc3</jdbc.version>
+                <jdbc.version>9.3-1102-jdbc3</jdbc.version>
                 <jdbc.driverClassName>org.postgresql.Driver</jdbc.driverClassName>
                 <jdbc.url><![CDATA[jdbc:postgresql://localhost/openxds]]></jdbc.url>
                 <jdbc.username>postgres</jdbc.username>
@@ -584,9 +582,9 @@
         <dbunit.dataTypeFactoryName>org.dbunit.dataset.datatype.DefaultDataTypeFactory</dbunit.dataTypeFactoryName>
         <dbunit.operation.type>CLEAN_INSERT</dbunit.operation.type>
         <hibernate.dialect>org.hibernate.dialect.PostgreSQLDialect</hibernate.dialect>
-        <jdbc.groupId>postgresql</jdbc.groupId>
+        <jdbc.groupId>org.postgresql</jdbc.groupId>
         <jdbc.artifactId>postgresql</jdbc.artifactId>
-        <jdbc.version>8.3-603.jdbc4</jdbc.version>
+        <jdbc.version>9.3-1102-jdbc3</jdbc.version>
         <jdbc.driverClassName>org.postgresql.Driver</jdbc.driverClassName>
         <jdbc.url><![CDATA[jdbc:postgresql://localhost/openxds]]></jdbc.url>
         <jdbc.username>openxds</jdbc.username>
@@ -624,9 +622,10 @@
         <xfire.version>1.2.6</xfire.version>
         
         <!-- Properties defined by OpenXDS -->
-        <openexchange.version>3.0.0</openexchange.version>
-        <openpixpdq.version>3.0.0</openpixpdq.version>
+        <openexchange.version>3.1.0</openexchange.version>
+        <openempi.version>3.1.0</openempi.version>
         <braid.version>1.2.2</braid.version>
+        <jetty.version>6.1.24</jetty.version>
         <hapi.version>0.5.1</hapi.version>
         <omar.version>3.1</omar.version>
   		<oasis.version>1.0</oasis.version> 

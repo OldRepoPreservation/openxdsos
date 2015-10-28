@@ -4,7 +4,6 @@ import gov.nist.registry.common2.exception.XdsErrorCodeException;
 import gov.nist.registry.common2.exception.XdsInternalException;
 import gov.nist.registry.common2.registry.AdhocQueryResponse;
 import gov.nist.registry.common2.registry.MetadataSupport;
-import gov.nist.registry.common2.registry.Properties;
 import gov.nist.registry.common2.registry.RegistryErrorList;
 import gov.nist.registry.common2.registry.RegistryResponse;
 import gov.nist.registry.common2.registry.RetrieveMultipleResponse;
@@ -26,10 +25,13 @@ import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.transport.http.TransportHeaders;
 import org.apache.commons.logging.LogFactory;
-import org.openhealthtools.openxds.XdsFactory;
-import org.openhealthtools.openxds.log.Log;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openxds.common.XdsConstants;
+import org.openhealthtools.openxds.common.XdsFactory;
+import org.openhealthtools.openexchange.config.PropertyFacade;
+import org.openhealthtools.openexchange.syslog.Log;
+import org.openhealthtools.openexchange.syslog.LoggerException;
 
 public class XdsService extends AppendixV {
 	protected Log log = null;
@@ -49,7 +51,13 @@ public class XdsService extends AppendixV {
 			registerBEndpoint = "http://localhost:9080/" + XdsService.technicalFramework + "/services/xdsregistryb";
 	}
 
-	protected boolean isSecure() { return is_secure; }
+	protected boolean isSecure() { 
+		String protocol = getMessageContext().getIncomingTransportName();
+		if (protocol != null && protocol.equalsIgnoreCase("https")) {
+			return true;
+		} 
+		return false;
+	}
 
 	public void useXop() {
 		this.return_message_context = MessageContext.getCurrentMessageContext();
@@ -94,53 +102,58 @@ public class XdsService extends AppendixV {
 //				log_message = log.createMessage(getMessageContext().getFrom().getAddress());
 				log_message = log.createMessage(incoming_ip_address);
 			}
-			log_message.addOtherParam(Fields.service, service_name);
-			is_secure = getMessageContext().getTo().toString().indexOf("https://") != -1;
-			log_message.addHTTPParam(Fields.isSecure, (is_secure) ? "true" : "false");
-			log_message.addHTTPParam(Fields.date, getDateTime());
-			log_message.setSecure(is_secure);
-			if (request != null)
-				log_message.addOtherParam("Request", request.toString());
-			else {
-				log_message.addErrorParam("Error", "Cannot access request body in XdsService.begin_service()");
-				return start_up_error(request, null, actor, "Request body is null");
-			}
-
-            HashMap transportHeaders = (HashMap)getMessageContext().getProperty("TRANSPORT_HEADERS");
-			for (Object o_key : transportHeaders.keySet()) {
-				String key = (String) o_key;
-				String value = (String) transportHeaders.get(key);
-                
-				if (logger.isDebugEnabled()) {
-					logger.debug("request header=" + key +", value=" + value );
+			
+			if (log_message != null) {
+				log_message.addOtherParam(Fields.service, service_name);
+				is_secure = getMessageContext().getTo().toString().indexOf("https://") != -1;
+				log_message.addHTTPParam(Fields.isSecure, (is_secure) ? "true" : "false");
+				log_message.addHTTPParam(Fields.date, getDateTime());
+				log_message.setSecure(is_secure);
+				if (request != null)
+					log_message.addOtherParam("Request", request.toString());
+				else {
+					log_message.addErrorParam("Error", "Cannot access request body in XdsService.begin_service()");
+					return start_up_error(request, null, actor, "Request body is null");
 				}
 
-				Vector<String> thdrs = new Vector<String>();
-				thdrs.add(key + " : " + value);
-				addHttp( "HTTP Header", thdrs ) ;
+				TransportHeaders transportHeaders = (TransportHeaders) getMessageContext()
+						.getProperty("TRANSPORT_HEADERS");
+				for (Object o_key : transportHeaders.keySet()) {
+					String key = (String) o_key;
+					String value = (String) transportHeaders.get(key);
+
+					if (logger.isDebugEnabled()) {
+						logger.debug("request header=" + key + ", value=" + value);
+					}
+
+					Vector<String> thdrs = new Vector<String>();
+					thdrs.add(key + " : " + value);
+					addHttp("HTTP Header", thdrs);
+				}
+
+				if (getMessageContext().getEnvelope().getHeader() != null) {
+
+					try {
+						addSoap("Soap Header", getMessageContext().getEnvelope().getHeader().toStringWithConsume());
+					} catch (OMException e) {
+					} catch (XMLStreamException e) {
+					}
+				}
+
+				if (getMessageContext().getEnvelope().getBody() != null) {
+					try {
+						addSoap("Soap Envelope", getMessageContext().getEnvelope().toStringWithConsume());
+					} catch (OMException e) {
+					} catch (XMLStreamException e) {
+					}
+				}
+				// log_message.addHTTPParam(Fields.fromIpAddress ,
+				// getMessageContext().getFrom().getAddress() ) ;
+				log_message.addHTTPParam(Fields.fromIpAddress, incoming_ip_address);
+				log_message.addHTTPParam(Fields.endpoint, getMessageContext().getTo().toString());
 			}
-
-
-			if ( getMessageContext().getEnvelope().getHeader() != null )
-			{
-
-				try {
-					addSoap ( "Soap Header", getMessageContext().getEnvelope().getHeader().toStringWithConsume() ) ;
-				}  catch (OMException e) {} catch (XMLStreamException e) {}
-			}
-
-			if ( getMessageContext().getEnvelope().getBody() != null )
-			{
-				try
-				{
-					addSoap( "Soap Envelope", getMessageContext().getEnvelope().toStringWithConsume() );
-				}  catch (OMException e) {} catch (XMLStreamException e) {}
-			}
-//			log_message.addHTTPParam(Fields.fromIpAddress , getMessageContext().getFrom().getAddress() ) ;  
-			log_message.addHTTPParam(Fields.fromIpAddress , incoming_ip_address ) ;  			
-			log_message.addHTTPParam(Fields.endpoint , getMessageContext().getTo().toString() ) ; 
-
-			return null;  // no error
+			return null; // no error
+			
 		} catch (LoggerException e) {
 			logger.error("LoggerException: new Log: " + e.getMessage());
 			e.printStackTrace();
@@ -261,7 +274,8 @@ public class XdsService extends AppendixV {
 	}
 
 	protected void startTransactionLog() throws LoggerException {
-		if (log == null) {
+		String enableSysLog = PropertyFacade.getString(XdsConstants.ENABLE_SYSLOG);
+		if (log == null && "true".equalsIgnoreCase(enableSysLog)) {
 			logger.info("+++++++++++++++++++++ start transaction log");
 			try {
 				log = (Log) XdsFactory.getInstance().getBean("logsService");
@@ -322,27 +336,31 @@ public class XdsService extends AppendixV {
 
 		try 
 		{
-			log_message.addHTTPParam( title , buffer.toString() ) ;
+			if (log_message != null)
+				log_message.addHTTPParam( title , buffer.toString() ) ;
 		} catch (LoggerException e) {}
 	}
 	private void addSoap ( String t , String s )
 	{
 		try {
-			log_message.addSoapParam( t , s ) ;
+			if (log_message != null)
+				log_message.addSoapParam( t , s ) ;
 		} catch (LoggerException e) {}
 	}
 
 	protected void addError ( String s )
 	{
 		try {
-			log_message.addErrorParam( "Error" , s ) ;
+			if (log_message != null)
+				log_message.addErrorParam( "Error" , s ) ;
 		} catch (LoggerException e) {}
 	}
 
 	protected void addOther ( String name, String s )
 	{
 		try {
-			log_message.addOtherParam( name , s ) ;
+			if (log_message != null)
+				log_message.addOtherParam( name , s ) ;
 		} catch (LoggerException e) {}
 	}
 

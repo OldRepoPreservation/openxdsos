@@ -13,7 +13,7 @@
 
 	<artifactId>openxds-registry-patient-openempi</artifactId>
 	<packaging>jar</packaging>
-	<name>OpenXDS - Registry Light Weight Patient</name>
+	<name>OpenXDS - OpenEMPI Patient Registry</name>
 
 	<build>
 		<plugins>
@@ -63,11 +63,6 @@
 	<!-- Dependencies calculated by AppFuse when running full-source plugin -->
 	<dependencies>
 		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
 			<version>${aspectj.version}</version>
@@ -81,11 +76,6 @@
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 			<version>${aspectj.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhie.openempi</groupId>
-			<artifactId>openpixpdq</artifactId>
-			<version>${openpixpdq.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -186,12 +176,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-config</artifactId>
+			<artifactId>openxds-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>common-utils</artifactId>
+			<artifactId>openxds-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

@@ -52,6 +52,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+<!-- 		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -72,6 +73,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -133,52 +135,6 @@
 		<dependency>
 			<groupId>org.openhealthtools.openxds</groupId>
 			<artifactId>openxds-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>common-ws</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>iheos</artifactId>
-			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>ant</artifactId>
-					<groupId>ant</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.openhie.openempi</groupId>
-			<artifactId>openpixpdq</artifactId>
-			<version>${openpixpdq.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-annotations</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-registry-adapter-omar</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-registry-patient-openempi</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-repository</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -320,9 +276,26 @@
 			<version>${velocity.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openhealthtools.openxds</groupId>
-			<artifactId>openxds-config</artifactId>
-			<version>${project.version}</version>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <version>${jetty.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>servlet-api</artifactId>
+                    <groupId>org.mortbay.jetty</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jsp-2.1-jetty</artifactId>
+            <version>${jetty.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>ant</artifactId>
+                    <groupId>ant</groupId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<!--@Custom dependencies go here@ -->
 	</dependencies>

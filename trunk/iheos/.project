@@ -1,7 +1,11 @@
 <projectDescription>
   <name>iheos</name>
   <comment>Implements the IHE XDS profile - XDS Repository and Registry actors</comment>
-  <projects/>
+  <projects>
+    <project>openxds-api</project>
+    <project>openxds-core</project>
+    <project>openxds-log</project>
+  </projects>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
@@ -15,12 +19,8 @@
     <buildCommand>
       <name>org.springframework.ide.eclipse.core.springbuilder</name>
     </buildCommand>
-    <buildCommand>
-      <name>org.eclipse.m2e.core.maven2Builder</name>
-    </buildCommand>
   </buildSpec>
   <natures>
-    <nature>org.eclipse.m2e.core.maven2Nature</nature>
     <nature>org.eclipse.wst.common.project.facet.core.nature</nature>
     <nature>org.eclipse.jdt.core.javanature</nature>
     <nature>org.eclipse.wst.common.modulecore.ModuleCoreNature</nature>

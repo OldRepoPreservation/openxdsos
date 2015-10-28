@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-     Copyright (c) 2009 Misys Open Source Solutions (MOSS) and others
+     Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -23,18 +23,12 @@
 
 <!-- The XDS Repository Actor Connections -->
 <Configuration>
-	<StandardConnection name="xds-repository">
-		<!--The host name of the XDS Repository Server-->
+	<StandardConnection name="xds-registry-client">
+		<!--The host name of the XDS Registry Server-->
 		<HostName>localhost</HostName>
 		<!--The port-->
-		<Port>8020</Port>
-       
-     	<Identifier name="AssigningAuthority">
-			<NamespaceId>IHENA</NamespaceId>
-			<UniversalId>1.3.6.1.4.1.21367.2009.1.2.300</UniversalId>
-			<UniversalIdType>ISO</UniversalIdType>
-		</Identifier>
-       
-        <Includefile name="XdsCodesTest.xml" />		
+		<Port>8010</Port>
+		<!--The URL of the XDS Registry web services -->
+		<UrlPath>/openxds/services/DocumentRegistry</UrlPath>		
 	</StandardConnection>
 </Configuration>

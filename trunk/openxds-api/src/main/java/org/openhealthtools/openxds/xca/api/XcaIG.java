@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2009-2010 Misys Open Source Solutions (MOSS) and others
+ *  Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package org.openhealthtools.openxds.xca.api;
 
 import java.util.Map;
 
-import org.openhealthtools.common.ihe.IheActor;
+import org.openhealthtools.openexchange.actorconfig.IheActor;
 import org.openhealthtools.openexchange.actorconfig.net.IConnectionDescription;
 
 

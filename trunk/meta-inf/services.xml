@@ -1,0 +1,33 @@
+<serviceGroup>
+
+    <service name="DocumentRegistry">
+        <description>XDS.b Registry Interface</description>
+        <parameter name="ServiceClass" locked="false">gov.nist.registry.ws.serviceclasses.RegistryB</parameter>
+        <parameter name="useOriginalwsdl">true</parameter>
+        <parameter name="modifyUserWSDLPortAddress">true</parameter>
+        
+        <operation name="DocumentRegistry_RegisterDocumentSet-b">
+            <messageReceiver class="gov.nist.registry.common2.service.XDSRawXMLInOutMessageReceiver"/>
+		<actionMapping>urn:ihe:iti:2007:RegisterDocumentSet-b</actionMapping>
+        </operation>
+
+        <operation name="DocumentRegistry_RegistryStoredQuery">
+            <messageReceiver class="gov.nist.registry.common2.service.XDSRawXMLInOutMessageReceiver"/>
+            <actionMapping>urn:ihe:iti:2007:RegistryStoredQuery</actionMapping>
+            <actionMapping>urn:ihe:iti:2009:MultiPatientStoredQuery</actionMapping>
+        </operation>
+
+        <operation name="DocumentRegistry_UpdateDocumentSet">
+            <messageReceiver class="gov.nist.registry.common2.service.XDSRawXMLInOutMessageReceiver"/>
+            <actionMapping>urn:ihe:iti:2010:UpdateDocumentSet</actionMapping>
+	    <outputActionMapping>urn:ihe:iti:2010:UpdateDocumentSetResponse</outputActionMapping>
+        </operation>
+
+        <operation name="DocumentRegistry_DeleteDocumentSet">
+            <messageReceiver class="gov.nist.registry.common2.service.XDSRawXMLInOutMessageReceiver"/>
+            <actionMapping>urn:ihe:iti:2010:DeleteDocumentSet</actionMapping>
+	    <outputActionMapping>urn:ihe:iti:2010:DeleteDocumentSetResponse</outputActionMapping>
+        </operation>
+    </service>
+
+</serviceGroup>

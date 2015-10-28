@@ -40,9 +40,6 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openhealthtools.common.ihe.IheActor;
-import org.openhealthtools.common.utils.ConnectionUtil;
-import org.openhealthtools.common.ws.server.IheHTTPServer;
 import org.openhealthtools.openexchange.actorconfig.net.IConnectionDescription;
 import org.openhealthtools.openexchange.audit.ActiveParticipant;
 import org.openhealthtools.openexchange.audit.AuditCodeMappings;
@@ -50,24 +47,26 @@ import org.openhealthtools.openexchange.audit.IheAuditTrail;
 import org.openhealthtools.openexchange.audit.ParticipantObject;
 import org.openhealthtools.openexchange.audit.AuditCodeMappings.AuditTypeCodes;
 import org.openhealthtools.openexchange.config.PropertyFacade;
-import org.openhealthtools.openxds.XdsFactory;
-import org.openhealthtools.openxds.log.LogMessage;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.syslog.LogMessage;
+import org.openhealthtools.openexchange.syslog.LoggerException;
+import org.openhealthtools.openxds.common.ConnectionUtil;
+import org.openhealthtools.openxds.common.XdsFactory;
 import org.openhealthtools.openxds.repository.api.RepositoryException;
 import org.openhealthtools.openxds.repository.api.RepositoryRequestContext;
 import org.openhealthtools.openxds.repository.api.XdsRepository;
 import org.openhealthtools.openxds.repository.api.XdsRepositoryItem;
 import org.openhealthtools.openxds.repository.api.XdsRepositoryService;
 import org.openhealthtools.openxua.api.XuaException;
+import javax.mail.util.ByteArrayDataSource;
 
 
 public class ProvideAndRegisterDocumentSet extends XdsCommon {
 	ContentValidationService validater;
 	String registry_endpoint = null;
-	MessageContext messageContext;
 	boolean accept_xop = true;
-    IConnectionDescription connection = null;
-    IConnectionDescription registryClientConnection = null;
+	private XdsRepository actor = null;
+	private IConnectionDescription registryClientConnection = null;
+
 	/* The IHE Audit Trail for this actor. */
 	private IheAuditTrail auditLog = null;
 	private final static Log logger = LogFactory.getLog(ProvideAndRegisterDocumentSet.class);
@@ -83,30 +82,22 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		transaction_type = PR_transaction;
 
 		try {
-			if (messageContext == null) {
-				throw new XdsInternalException("Cannot find MessageContext");
-			}
-			IheHTTPServer httpServer = (IheHTTPServer)messageContext.getTransportIn().getReceiver();
-			
-			IheActor actor = httpServer.getIheActor();
+			actor = XdsFactory.getRepositoryActor(); 
 			if (actor == null) {
 				throw new XdsInternalException("Cannot find XdsRepository actor configuration.");			
 			}
-			connection = actor.getConnection();
-			if (connection == null) {
-				throw new XdsInternalException("Cannot find Server connection configuration.");			
-			}
-			registryClientConnection = ((XdsRepository)actor).getRegistryClientConnection();
+			
+			registryClientConnection = actor.getRegistryClientConnection();
 			if (registryClientConnection == null) {
 				throw new XdsInternalException("Cannot find XdsRepository Registry connection configuration.");			
 			}
-			auditLog = actor.getAuditTrail();	
+			auditLog = (IheAuditTrail)actor.getAuditTrail();	
 			init(new RegistryResponse( (xds_version == xds_a) ?	Response.version_2 : Response.version_3), xds_version, messageContext);
 		} catch (XdsInternalException e) {
-			logger.fatal("Internal Error creating RegistryResponse: " + e.getMessage());
-		}
+            logger.fatal(logger_exception_details(e));
+		} 
 	}
-
+	
 	public OMElement provideAndRegisterDocumentSet(OMElement pnr, ContentValidationService validater) {
 		this.validater = validater;
 
@@ -186,7 +177,8 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		} catch (XdsInternalException e) {
 			logger.error("Error generating response");
 			try {
-				log_message.addErrorParam("Internal Error", "Error generating response from PnR");
+				if (log_message != null)
+					log_message.addErrorParam("Internal Error", "Error generating response from PnR");
 			}
 			catch (LoggerException e1) {
 
@@ -240,9 +232,10 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		
 		generateAuditLog(m);
 
-		log_message.addOtherParam("SSuid", m.getSubmissionSetUniqueId());
-		log_message.addOtherParam("Structure", m.structure());
-
+		if(log_message != null){
+			log_message.addOtherParam("SSuid", m.getSubmissionSetUniqueId());
+			log_message.addOtherParam("Structure", m.structure());
+		}	
 		if (xds_version == xds_b)
 			this.validate_docs_and_metadata_b(pnr, m);
 
@@ -327,11 +320,10 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		String epr = registry_endpoint();
 
 		Protocol protocol = ConnectionUtil.getProtocol(registryClientConnection);
-
-		log_message.addOtherParam("Register transaction endpoint", epr);
-
-		log_message.addOtherParam("Register transaction", register_transaction.toString());
-
+		if (log_message != null){
+			log_message.addOtherParam("Register transaction endpoint", epr);
+			log_message.addOtherParam("Register transaction", register_transaction.toString());
+		}	
 		boolean success = false;
 		Soap soap = new Soap();
 		try {
@@ -352,7 +344,8 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 				QName testlogid = new QName("testLogId");
 				String registryTestLogId = result.getAttributeValue(testlogid);
 				if (registryTestLogId != null) {
-					log_message.addOtherParam("Registry Test Log ID", registryTestLogId);
+					if (log_message != null)
+						log_message.addOtherParam("Registry Test Log ID", registryTestLogId);
 					// remove attribute - just private communitication
 					OMAttribute tlidA = result.getAttribute(testlogid);
 					if (tlidA != null)
@@ -363,9 +356,11 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 
 			if (result == null) {
 				response.add_error(MetadataSupport.XDSRepositoryError, "Null response message from Registry", "ProvideAndRegistryDocumentSet.java", log_message);
-				log_message.addOtherParam("Register transaction response", "null");
+				if (log_message != null)
+					log_message.addOtherParam("Register transaction response", "null");
 			} else {
-				log_message.addOtherParam("Register transaction response", result.toString());
+				if (log_message != null)
+					log_message.addOtherParam("Register transaction response", result.toString());
 
 				String status = result.getAttributeValue(MetadataSupport.status_qname);
 				if (status == null) {
@@ -423,8 +418,9 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 	private void rollbackDocument(List<String> docs) {
 		try {
 			XdsRepositoryService rs = XdsFactory.getXdsRepositoryService();
-			
-			rs.delete(docs, new RepositoryRequestContext());
+			RepositoryRequestContext context = new RepositoryRequestContext();
+			context.setActorDescription(actor.getActorDescription());
+			rs.delete(docs, context);
 			
 		}catch(RepositoryException e) {
 			logger.error("Error rolling back document from the repository - " + e.getMessage(), e);
@@ -438,8 +434,10 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 	void log_headers(Soap soap) throws LoggerException, XdsInternalException {
 		OMElement in_hdr = soap.getInHeader();
 		OMElement out_hdr = soap.getOutHeader();
-		log_message.addSoapParam("Header sent to Registry", (out_hdr == null) ? "Null" : out_hdr.toString());
-		log_message.addSoapParam("Header received from Registry", (in_hdr == null) ? "Null" : in_hdr.toString());
+		if (log_message != null){
+			log_message.addSoapParam("Header sent to Registry", (out_hdr == null) ? "Null" : out_hdr.toString());
+			log_message.addSoapParam("Header received from Registry", (in_hdr == null) ? "Null" : in_hdr.toString());
+		}	
 	}
 
 
@@ -480,7 +478,8 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		XdsRepositoryItem item = XdsFactory.getXdsReposiotryItem();
 		item.setDocumentUniqueId(uid);
 		item.setDataHandler(dataHandler);
-		
+		item.setExtrinsicObject(extrinsic_object);
+
 		String mime_type = extrinsic_object.getAttributeValue(MetadataSupport.mime_type_qname);
 
 		int isize = -1; 
@@ -506,7 +505,7 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 
 		try {
 			RepositoryRequestContext context = new RepositoryRequestContext();
-			context.setConnection(connection);
+			context.setActorDescription(actor.getActorDescription());
 			rm.insert(item, context);
 		}catch(RepositoryException e) {
 			throw new XdsException("Error saving document to the repository - " + e.getMessage(), e);
@@ -556,8 +555,9 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		if (mime_type == null || mime_type.equals(""))
 			throw new MetadataException("ExtrinsicObject " + id + " does not have a mimeType");
 
-        DataHandler dataHandler = new DataHandler(new String(bytes), mime_type);
-
+        ByteArrayDataSource ds = new ByteArrayDataSource(bytes, mime_type);
+        DataHandler dataHandler = new DataHandler(ds);
+        
 		String size_str = Integer.toString(bytes.length);
 		String hash_value = null;
 		try {
@@ -573,9 +573,10 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		item.setDocumentUniqueId(uid);
 		item.setDataHandler(dataHandler); 
 		item.setMimeType(mime_type);
+		item.setExtrinsicObject(extrinsic_object);
 		try {
 			RepositoryRequestContext context = new RepositoryRequestContext();
-			context.setConnection(connection);
+			context.setActorDescription(actor.getActorDescription());
 			rm.insert(item, context);
 		}catch(RepositoryException e) {
 			throw new XdsException("Error saving document to the repository - " + e.getMessage(), e);
@@ -595,7 +596,7 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 	}
 
 	String document_uri(String uid, String mime_type)throws MetadataException, XdsConfigurationException, XdsException {
-		return Repository.getBaseUri() + uid + "." + (new DocumentTypes(connection)).fileExtension(mime_type);
+		return Repository.getBaseUri() + uid + "." + (new DocumentTypes(actor.getActorDescription())).fileExtension(mime_type);
 	}
 	
 	/**
@@ -610,8 +611,6 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 		String remoteIP = (String)getMessageContext().getProperty(MessageContext.REMOTE_ADDR);
 		String localIP = (String)getMessageContext().getProperty(MessageContext.TRANSPORT_ADDR);
 
-	
-		
 		ParticipantObject set = new ParticipantObject("SubmissionSet",  meatdata.getSubmissionSetUniqueId());
 		ParticipantObject patientObj = new ParticipantObject("PatientIdentifier", meatdata.getSubmissionSetPatientId());
 		if(isITI41){
@@ -620,8 +619,7 @@ public class ProvideAndRegisterDocumentSet extends XdsCommon {
 			source.setAccessPointId(remoteIP);
 			
 			ActiveParticipant dest = new ActiveParticipant();
-			//TODO: Needs to be improved
-			String userid = "http://"+connection.getHostname()+":"+connection.getPort()+"/axis2/services/xdsrepositoryb"; 
+			String userid = actor.getServiceEndpoint(isHttps());
 			dest.setUserId(userid);
 			dest.setAccessPointId(localIP);
 			auditLog.logDocumentImport(source, dest, patientObj, set, typeCode);

@@ -1,10 +1,5 @@
 package gov.nist.registry.common2.registry;
 
-import gov.nist.registry.common2.exception.ExceptionUtil;
-import gov.nist.registry.common2.exception.XdsException;
-import gov.nist.registry.common2.exception.XdsInternalException;
-import gov.nist.registry.ws.SoapHeader;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +7,17 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openhealthtools.openexchange.actorconfig.net.IConnectionDescription;
-import org.openhealthtools.openexchange.datamodel.Identifier;
-import org.openhealthtools.openxds.XdsFactory;
-import org.openhealthtools.openxds.log.LogMessage;
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.syslog.LogMessage;
+import org.openhealthtools.openexchange.syslog.LoggerException;
+import org.openhealthtools.openxds.common.XdsFactory;
 import org.openhealthtools.openxds.registry.api.ResourceingFilter;
 import org.openhealthtools.openxua.api.AssertionException;
 import org.openhealthtools.openxua.api.XServiceProvider;
+
+import gov.nist.registry.common2.exception.ExceptionUtil;
+import gov.nist.registry.common2.exception.XdsException;
+import gov.nist.registry.common2.exception.XdsInternalException;
+import gov.nist.registry.ws.SoapHeader;
 
 public class XdsCommon  {
 
@@ -29,7 +27,7 @@ public class XdsCommon  {
 	public static final short xds_a = 2;
 	public static final short xds_b = 3;
 	public short xds_version = xds_none;
-	MessageContext messageContext = null;
+	protected MessageContext messageContext = null;
 	/**Is Responding Gateway*/
 	boolean isRG = false;
 	private final static Log logger = LogFactory.getLog(XdsCommon.class);
@@ -44,6 +42,15 @@ public class XdsCommon  {
 
 	public MessageContext getMessageContext() {
 		return messageContext;
+	}
+	
+	/**whether this transaction request is secure*/
+	protected boolean isHttps() {
+		String protocol = this.messageContext.getIncomingTransportName();
+		if (protocol != null && protocol.equalsIgnoreCase("https")) {
+			return true;
+		} 
+		return false;
 	}
 	
 	public void setIsRG() {
@@ -70,7 +77,7 @@ public class XdsCommon  {
 	protected void log_status() {
 		try {
 			String e_and_w = response.getErrorsAndWarnings();
-			if (e_and_w != null && !e_and_w.equals(""))
+			if (e_and_w != null && !e_and_w.equals("") && log_message != null)
 				log_message.addErrorParam("Error", e_and_w);
 		} catch (Exception e) {
 			response.error("Internal Error: cannot set final status in test log on transaction");
@@ -92,18 +99,20 @@ public class XdsCommon  {
 		
 		generateAuditLog(response);
 		
-		if (log_message == null) {
+		/*if (log_message == null) {
 			logger.fatal("\nFATAL ERROR: XdsCommon.log_response(): log_message is null\n");
 			return;
-		}
+		}*/
 		try {
-			if (response.has_errors()) {
-				log_message.setPass(false);
-				log_message.addErrorParam("Errors", response.getErrorsAndWarnings());
-			} else
-				log_message.setPass(true);
-
-			log_message.addOtherParam("Response", response.getResponse().toString());
+			if (log_message != null){
+				if (response.has_errors()) {
+					log_message.setPass(false);
+					log_message.addErrorParam("Errors", response.getErrorsAndWarnings());
+				} else
+					log_message.setPass(true);
+	
+				log_message.addOtherParam("Response", response.getResponse().toString());
+			}
 		}
 		catch (LoggerException e) {
 			logger.error("**************ERROR: Logger exception attempting to return to user");
@@ -195,38 +204,12 @@ public class XdsCommon  {
 			throw e;
 		}
 		catch(Exception e){
-			logger.error("Exception filtering metadata");
+			logger.error("Exception filtering metadata", e);
 			throw e;
 		}
 		
 		return metadata;
 	}
 
-    /**
-     * Reconciles authority with the ConnectionDescritpion configuration. An authority
-     * can have NameSpace and/or UniversalId/UniversalIdType. For example, in the data source such as
-     * database, if an authority is represented by NameSpace only, while in the xml configuration, the authority is configured
-     * with both NameSpace and UnviersalId/UniversalIdType. The authority in the datasource has to be mapped
-     * to the authority configured in the XML files.
-     *
-     * @param authority The authority
-     * @param connection
-     * @param adapter the adapter from where to get the domains
-     * @return The authority according the configuration
-     */
-    protected Identifier reconcileIdentifier(Identifier authority, IConnectionDescription connection) {
-        List<org.openhealthtools.openexchange.datamodel.Identifier> identifiers = connection.getAllIdentifiersByType("domain");
-        for (org.openhealthtools.openexchange.datamodel.Identifier id : identifiers) {
-    
-        	//TODO: Fix the Identifier type
-        	//Temporary conversion during the library migration
-        	Identifier identifier = new Identifier(id.getNamespaceId(), id.getUniversalId(), id.getUniversalIdType()); 
-            if ( identifier.equals(authority) ) {
-                return identifier;
-            }
-        }
-        //no identifier is found, just return the original authority
-        return authority;
-    }
-
+	
 }

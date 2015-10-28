@@ -1,12 +1,5 @@
 package gov.nist.registry.common2.registry;
 
-import gov.nist.registry.common2.exception.MetadataException;
-import gov.nist.registry.common2.exception.MetadataValidationException;
-import gov.nist.registry.common2.exception.NoMetadataException;
-import gov.nist.registry.common2.exception.NoSubmissionSetException;
-import gov.nist.registry.common2.exception.XdsInternalException;
-import gov.nist.registry.common2.xml.Util;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +14,21 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.openhealthtools.openxds.log.LogMessage;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openhealthtools.openexchange.syslog.LogMessage;
 
-public class Metadata {
+import gov.nist.registry.common2.exception.MetadataException;
+import gov.nist.registry.common2.exception.MetadataValidationException;
+import gov.nist.registry.common2.exception.NoMetadataException;
+import gov.nist.registry.common2.exception.NoSubmissionSetException;
+import gov.nist.registry.common2.exception.XdsInternalException;
+import gov.nist.registry.common2.xml.Util;
+
+public class Metadata
+{
+	private Log log = LogFactory.getLog(Metadata.class);
+	
 	protected OMFactory fac;
 	boolean interpretAsSubmission = true;
 	// private final static Logger logger = Logger.getLogger(Metadata.class);
@@ -52,6 +57,94 @@ public class Metadata {
 	List<String> objectsReferenced = null;
 	// for id, list of classification uuids
 	HashMap<String, List<String>> classificationsOfId = null;
+
+	boolean version2;
+	boolean isUpdate = false;
+	
+	OMElement metadataDup = null; // both of these are set by dup_wrapper which
+									// is used by metadata_copy
+	OMElement wrapperDup = null;
+	boolean mustDup = false;
+	int idAllocation = 0;
+
+	IdIndex idIndex = null;
+
+	public static final List<String> iheAssocTypes = new ArrayList<String>() {
+		{
+			add("APND");
+			add("XFRM");
+			add("RPLC");
+			add("XFRM_RPLC");
+			add("signs");
+		}
+	};
+	
+	public Metadata(OMElement metadata, boolean isUpdate) throws MetadataException,
+			MetadataValidationException {
+		this.metadata = metadata;
+		this.isUpdate = isUpdate;
+		runParser();
+	}
+	
+	public Metadata(OMElement metadata) throws MetadataException,
+			MetadataValidationException {
+		this.metadata = metadata;
+		runParser();
+	}
+
+	public Metadata(File metadata_file) throws XdsInternalException,
+			MetadataException, MetadataValidationException {
+		metadata = Util.parse_xml(metadata_file);
+		runParser();
+	}
+
+	public Metadata(File metadata_file, boolean parse)
+			throws XdsInternalException, MetadataException,
+			MetadataValidationException {
+		metadata = Util.parse_xml(metadata_file);
+		wrapper = null;
+		wrappers = new ArrayList();
+		if (parse) {
+			wrapper = find_metadata_wrapper();
+			wrappers.add(wrapper);
+			parse(false);
+		} else {
+			init();
+		}
+	}
+
+	public Metadata(File metadata_file, boolean parse, boolean find_wrapper)
+			throws XdsInternalException, MetadataException,
+			MetadataValidationException {
+		metadata = Util.parse_xml(metadata_file);
+		wrapper = null;
+		wrappers = new ArrayList();
+		if (find_wrapper) {
+			wrapper = find_metadata_wrapper();
+			wrappers.add(wrapper);
+		}
+		if (parse)
+			parse(false);
+		else
+			init();
+	}
+
+	public Metadata(OMElement metadata, boolean parse, boolean find_wrapper)
+			throws XdsInternalException, MetadataException,
+			MetadataValidationException {
+		this.metadata = metadata;
+		wrapper = null;
+		wrappers = new ArrayList();
+		if (find_wrapper) {
+			wrapper = find_metadata_wrapper();
+			wrappers.add(wrapper);
+		}
+		if (parse)
+			parse(false);
+		else
+			init();
+	}
+
 
 	public OMElement getMetadata() {
 		return metadata;
@@ -82,26 +175,6 @@ public class Metadata {
 
 		return buf.toString();
 	}
-
-	boolean version2;
-
-	OMElement metadataDup = null; // both of these are set by dup_wrapper which
-									// is used by metadata_copy
-	OMElement wrapperDup = null;
-	boolean mustDup = false;
-	int idAllocation = 0;
-
-	IdIndex idIndex = null;
-
-	public static final List<String> iheAssocTypes = new ArrayList<String>() {
-		{
-			add("APND");
-			add("XFRM");
-			add("RPLC");
-			add("XFRM_RPLC");
-			add("signs");
-		}
-	};
 
 	public void clearObjectRefs() {
 		objectRefs = new ArrayList<OMElement>();
@@ -312,66 +385,6 @@ public class Metadata {
 		init();
 		this.setGrokMetadata(false);
 	}
-
-	public Metadata(OMElement metadata) throws MetadataException,
-			MetadataValidationException {
-		this.metadata = metadata;
-		runParser();
-	}
-
-	public Metadata(File metadata_file) throws XdsInternalException,
-			MetadataException, MetadataValidationException {
-		metadata = Util.parse_xml(metadata_file);
-		runParser();
-	}
-
-	public Metadata(File metadata_file, boolean parse)
-			throws XdsInternalException, MetadataException,
-			MetadataValidationException {
-		metadata = Util.parse_xml(metadata_file);
-		wrapper = null;
-		wrappers = new ArrayList();
-		if (parse) {
-			wrapper = find_metadata_wrapper();
-			wrappers.add(wrapper);
-			parse(false);
-		} else {
-			init();
-		}
-	}
-
-	public Metadata(File metadata_file, boolean parse, boolean find_wrapper)
-			throws XdsInternalException, MetadataException,
-			MetadataValidationException {
-		metadata = Util.parse_xml(metadata_file);
-		wrapper = null;
-		wrappers = new ArrayList();
-		if (find_wrapper) {
-			wrapper = find_metadata_wrapper();
-			wrappers.add(wrapper);
-		}
-		if (parse)
-			parse(false);
-		else
-			init();
-	}
-
-	public Metadata(OMElement metadata, boolean parse, boolean find_wrapper)
-			throws XdsInternalException, MetadataException,
-			MetadataValidationException {
-		this.metadata = metadata;
-		wrapper = null;
-		wrappers = new ArrayList();
-		if (find_wrapper) {
-			wrapper = find_metadata_wrapper();
-			wrappers.add(wrapper);
-		}
-		if (parse)
-			parse(false);
-		else
-			init();
-	}
-
 	public void addMetadata(Metadata m) throws MetadataException,
 			MetadataValidationException {
 		if (m.getRoot() != null)
@@ -931,6 +944,30 @@ public class Metadata {
 
 		return ids;
 	}
+	
+	public String getExtrinsicObjectId() {
+		for (Iterator<OMElement> it = getExtrinsicObjects().iterator(); it
+				.hasNext();) {
+			OMElement ele = it.next();
+			String id = (ele.getAttributeValue(MetadataSupport.id_qname));
+			if (id != null) {
+				return id;
+			}
+		}
+		return null;
+	}
+	
+	public String getExtrinsicObjectLid() {
+		String lid = null;
+		for (Iterator<OMElement> it = getExtrinsicObjects().iterator(); it.hasNext(); ) {
+			OMElement ele = it.next();
+			lid = ele.getAttributeValue(MetadataSupport.lid_qname);
+			if (lid != null) {
+				return lid;
+			}
+		}
+		return lid;		
+	}
 
 	public List<String> getObjectRefIds() {
 		List<String> ids = new ArrayList<String>();
@@ -1190,7 +1227,8 @@ public class Metadata {
 
 			if (assoc_type(association_type).equals("HasMember")
 					&& "Reference".equals(getSlotValue(association,
-							"SubmissionSetStatus", 0))) {
+							"SubmissionSetStatus", 0)) ||
+					MetadataSupport.UPDATE_AVAILABILITY_ASSOCIATION_TYPE.indexOf(association_type) > 0) {
 				continue;
 			}
 
@@ -2433,9 +2471,26 @@ public class Metadata {
 			OMElement ele = (OMElement) objects.get(i);
 			lrol.addChild(ele);
 		}
-
+		if (log.isDebugEnabled()) {
+			log.debug("Build ebXML request:\n" + sor);
+		}
 		return sor;
 
+	}
+	
+	public OMElement getV3DeprecateObjectsRequest(String uuid) throws XdsInternalException {
+		OMNamespace lcm = MetadataSupport.ebLcm3;
+		OMNamespace rim = MetadataSupport.ebRIMns3;
+
+		OMElement deprecateObjectsRequest = this.om_factory().createOMElement("DeprecateObjectsRequest", lcm);
+		OMElement objectRefList = this.om_factory().createOMElement("ObjectRefList", rim);
+		deprecateObjectsRequest.addChild(objectRefList);
+		OMElement objectRef = this.om_factory().createOMElement("ObjectRef", rim);
+		OMAttribute att = this.om_factory().createOMAttribute("id", null, uuid);
+		objectRef.addAttribute(att);
+		objectRefList.addChild(objectRef);
+		
+		return deprecateObjectsRequest;
 	}
 
 	public String stripNamespace(String value) {
@@ -2617,4 +2672,7 @@ public class Metadata {
 
 	}
 
+	public boolean isUpdate() {
+		return isUpdate;
+	}
 }

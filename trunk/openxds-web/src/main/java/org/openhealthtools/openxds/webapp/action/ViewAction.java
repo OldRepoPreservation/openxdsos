@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2009-2010 Misys Open Source Solutions (MOSS) and others
+ *  Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -56,15 +56,27 @@ public class ViewAction extends BaseAction {
 	Map<String, String[]> parms;
 	String message = "";
 	String cntl = null;
+	String contextpath = null;
 	protected transient final Log log = LogFactory.getLog(getClass());
 	//private static final String repositoryUrl = "http://localhost:8020/axis2/services/xdsrepositoryb";
-	private static final String registryUrl = "http://localhost:8010/axis2/services/xdsregistryb";
+	private static String registryUrl = null;
 	
 	public String execute() throws Exception {
+		contextpath = getRequest().getContextPath();
+		StringBuffer reqURL = getRequest().getRequestURL();		
+		int index = 0;
+		if(reqURL != null)
+			index = reqURL.lastIndexOf("/");
+		
+        if (index != -1) {
+        	registryUrl = reqURL.substring(0 , index + 1)+ "services/DocumentRegistry";
+        }
 		return SUCCESS;
 	}
+
 	
 	public String query() throws Exception{
+		contextpath = getRequest().getContextPath();
 		if(getAction()=="" && getId() =="" || getAction()== null && getId() == null){
 			return SUCCESS;
 		}else{
@@ -84,6 +96,7 @@ public class ViewAction extends BaseAction {
 	}
 	
 	public String innerquery() throws Exception {
+		contextpath = getRequest().getContextPath();
 		getId();
 		getAction();
 		queryControl = get_query_control();
@@ -134,7 +147,7 @@ public class ViewAction extends BaseAction {
 		}
 		Xdsview xv = null;
 		if (parms != null && queryControl != null)
-			xv = queryControl.displayDetail(verb, parms, h());
+			xv = queryControl.displayDetail(verb, parms, h(), contextpath);
 		log.debug(xv.getOc().getBuf());
 		StringBuffer page = xv.getOc().getBuf();
 		getRequest().setAttribute("page", page);
@@ -178,7 +191,6 @@ public class ViewAction extends BaseAction {
 	}
 	
 	QueryContents runQuery(String query_type, boolean is_pid) throws Exception {
-		
 		queryControl = get_query_control();
 		if (queryControl == null) {
 			queryControl = new QueryControl();
@@ -341,7 +353,7 @@ public class ViewAction extends BaseAction {
 		h().o("<td  valign=\"top\">");
 		//detail
 		if (parms != null && queryControl != null)
-			queryControl.displayDetail(verb, parms, h()); 
+			queryControl.displayDetail(verb, parms, h(), contextpath); 
 
 		h().o("</td>");
 		h().o("</tr>");
@@ -358,7 +370,7 @@ public class ViewAction extends BaseAction {
 		try {
 			if (queryControl != null) {
 				int i = 0;
-				Xdsview xv = new Xdsview(h());
+				Xdsview xv = new Xdsview(h(), contextpath);
 				for (QueryContents qc : queryControl.getAllQueryContents()) {
 					System.out.println("displayStructure: " + qc.getClass().getName());
 					xv.displayOutline(queryControl, i);
@@ -389,7 +401,10 @@ public class ViewAction extends BaseAction {
 		}
 	}*/
 	void sq_panel(Metadata m)   throws ServletException {
-		h().post_form("/openxds-web/innerquery.action", null);
+		
+		h().post_form(contextpath +"/innerquery.action", null);
+		
+		
 
 		h().open("table");
 		

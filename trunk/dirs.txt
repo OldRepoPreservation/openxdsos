@@ -1,0 +1,12 @@
+common-utils
+openxds-api
+apache-axis2
+openxds-web
+openxds-repository
+iheos
+openxds-core
+openxds-registry-patient-lightweight
+openxds-log
+common-ws
+openxds-registry-adapter-omar
+openxds-config

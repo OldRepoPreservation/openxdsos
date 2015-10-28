@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2009-2010 Misys Open Source Solutions (MOSS) and others
+ *  Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -137,16 +137,13 @@ public class BaseHandler {
 			throw new IheConfigurationException("Invalid connection description (NULL)");
 		if (name == null)
 			throw new IheConfigurationException("Invalid identifier name (NULL)");
-		org.openhealthtools.openexchange.datamodel.Identifier identifier = connection.getIdentifier(name);
+		Identifier identifier = connection.getIdentifier(name);
 		
 		if ((identifier == null) && isRequired) {
 			throw new IheConfigurationException("No identifier '" + name + "' defined for connection \"" + connection.getDescription() + "\"");
 		}
 		
-     	//TODO: Fix the Identifier type
-     	//Temporary conversion during the library migration
-     	Identifier idOld = new Identifier(identifier.getNamespaceId(), identifier.getUniversalId(), identifier.getUniversalIdType()); 
-		return idOld;
+		return identifier;
 	}
 	
 }

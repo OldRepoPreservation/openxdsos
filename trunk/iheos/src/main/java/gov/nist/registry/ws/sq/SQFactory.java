@@ -14,7 +14,7 @@ import gov.nist.registry.ws.config.Registry;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openhealthtools.openxds.log.LoggerException;
+import org.openhealthtools.openexchange.syslog.LoggerException;
 
 /**
  * This class offers short-cut methods for using Stored Queries within the XDS registry front end.  It uses the generic
@@ -43,7 +43,8 @@ public class SQFactory {
 		return m;
 	}
 	
-	public Metadata findDocuments(String patientId, boolean leaf_class) throws XdsException, LoggerException, XDSRegistryOutOfResourcesException {
+	public Metadata findDocuments(String patientId, boolean leaf_class)
+			throws XdsException, LoggerException, XDSRegistryOutOfResourcesException {
 		SqParams parms = new SqParams();
 		parms.addParm("$XDSDocumentEntryPatientId", patientId);
 		
@@ -62,6 +63,21 @@ public class SQFactory {
 		return metadata;
 	}
 
+	public Metadata getDocuments(String logicalId, boolean leaf_class) 
+			throws XdsException, LoggerException, XDSRegistryOutOfResourcesException {
+		SqParams parms = new SqParams();
+		parms.addParm("$XDSDocumentEntryLogicalID", logicalId);
+		
+		StoredQuerySupport sqs = new StoredQuerySupport(parms, leaf_class, null /* Response */, common.log_message, false /* isSecure */);
+		Response response = new RegistryResponse(RegistryResponse.version_3);
+		StoredQueryFactory sqf = Registry.getStoredQueryFactory(parms, response, common.log_message);
+		sqf.setQueryId(MetadataSupport.SQ_GetDocumentsByLogicalId);
+		Metadata metadata = sqf.buildStoredQueryHandler(sqs).GetDocumentsByLogicalId(sqs);
+		if (response.has_errors()) 
+			throw new XdsException(response.getErrorsAndWarnings());
+		return metadata;
+	}
+	
 	public Metadata findFolders(String patientId, boolean leaf_class) throws XdsException, LoggerException, XDSRegistryOutOfResourcesException {
 		SqParams parms = new SqParams();
 		parms.addParm("$XDSFolderPatientId", patientId);

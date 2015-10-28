@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2009-2010 Misys Open Source Solutions (MOSS) and others
+ *  Copyright (c) 2009-2011 Misys Open Source Solutions (MOSS) and others
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 package org.openhealthtools.openxds.repository.api;
 
-import org.openhealthtools.openexchange.actorconfig.net.IConnectionDescription;
+import org.openhealthtools.openexchange.actorconfig.IActorDescription;
 
 
 /**
@@ -31,20 +31,20 @@ import org.openhealthtools.openexchange.actorconfig.net.IConnectionDescription;
  */
 public class RepositoryRequestContext {
 	
-	private IConnectionDescription connection;
+	private IActorDescription actorDescription;
 
 	/**
-	 * @return the connection
+	 * @return the actor description
 	 */
-	public IConnectionDescription getConnection() {
-		return connection;
+	public IActorDescription getActorDescription() {
+		return actorDescription;
 	}
 
 	/**
 	 * @param connection the connection to set
 	 */
-	public void setConnection(IConnectionDescription connection) {
-		this.connection = connection;
+	public void setActorDescription(IActorDescription actorDescription) {
+		this.actorDescription = actorDescription;
 	}
 	
 	
